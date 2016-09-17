@@ -21,6 +21,14 @@
     android:text="HTML PUT"
     android:onClick="putfile"
     />
+<ListView
+    android:id="@+id/list"
+    android:layout_height="wrap_content"
+    android:scrollingCache="true"
+    android:smoothScrollbar="true"
+    android:layout_width="match_parent">
+
+</ListView>
 
 </LinearLayout>
 
