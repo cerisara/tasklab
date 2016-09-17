@@ -15,5 +15,12 @@
     android:text="HTML GET"
     android:onClick="geturl"
     />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="HTML PUT"
+    android:onClick="putfile"
+    />
+
 </LinearLayout>
 
