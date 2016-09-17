@@ -20,6 +20,8 @@ public class TaskLabAct extends Activity
         setContentView(R.layout.main);
     }
 
+    // TODO add feedback to the user while its trying to connect
+
     /** Called when the user touches the button */
     public void geturl(View view) {
         AsyncHttpClient client = new AsyncHttpClient();
