@@ -25,7 +25,6 @@ import android.widget.Toast;
 import com.loopj.android.http.*;
 
 public class TaskLabAct extends FragmentActivity {
-    // TODO: check in the phone app storage if the config is here (secret keys + gtilab url); if not, let the user enter them in textfields
     private static String gitlabkey = "";// put your gitlab access token here";
     ListView listView;
     String[] vals = {"<New Task>"};
@@ -46,6 +45,49 @@ public class TaskLabAct extends FragmentActivity {
             gitlabkey=k;
         }
     }
+    private void editTask(final int taskid) {
+        class LoginDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setView(inflater.inflate(R.layout.dialog_edit, null))
+                        // Add action buttons
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                TextView txt = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.taskdef);
+                                // TODO: initialise la fenetre avec le texte precedent de la task ? (sauf pour newtask)
+                                String s = txt.getText().toString();
+                                // il nous faut une seule ligne par task
+                                s=s.replace('\n',' ');
+                                vals[taskid]=s;
+                                if (taskid>=vals.length) {
+                                    String[] vals2 = new String[vals.length+1];
+                                    System.arraycopy(vals,0,vals2,0,vals.length+1);
+                                    vals=vals2;
+                                    vals[vals.length-1]="<New Task>";
+                                }
+                                showList();
+                            }
+                        })
+                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                LoginDialogFragment.this.getDialog().cancel();
+                            }
+                        });
+
+                return builder.create();
+			}
+		}
+		LoginDialogFragment dialog = new LoginDialogFragment();
+		dialog.show(getSupportFragmentManager(),"edit task");
+    }
+
     private void askCreds() {
         class LoginDialogFragment extends DialogFragment {
 			@Override
@@ -76,24 +118,23 @@ public class TaskLabAct extends FragmentActivity {
 			}
 		}
 		LoginDialogFragment dialog = new LoginDialogFragment();
-		dialog.show(getSupportFragmentManager(),"dgs signin");
+		dialog.show(getSupportFragmentManager(),"signin");
 
     }
     private void showList() {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                System.out.println("run SHOWLIST");
                 // Get ListView object from xml
                 listView = (ListView) findViewById(R.id.list);
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(ctxt, android.R.layout.simple_list_item_1, vals);
                 listView.setAdapter(adapter);
-                System.out.println("run SHOWLIOOOOOOOOOOOOOOST");
                 listView.setOnItemClickListener(new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         int itemPosition     = position;
                         String  itemValue    = (String) listView.getItemAtPosition(position);
+                        editTask(itemPosition);
                     }
                 });
             }
