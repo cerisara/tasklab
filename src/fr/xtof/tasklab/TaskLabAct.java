@@ -1,5 +1,12 @@
 package fr.xtof.tasklab;
 
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.app.Dialog;
+import android.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.content.DialogInterface;
+import android.widget.TextView;
 import java.util.Arrays;
 import android.app.Activity;
 import android.os.Bundle;
@@ -17,9 +24,9 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import com.loopj.android.http.*;
 
-public class TaskLabAct extends Activity {
+public class TaskLabAct extends FragmentActivity {
     // TODO: check in the phone app storage if the config is here (secret keys + gtilab url); if not, let the user enter them in textfields
-    private final static String gitlabkey = "";// put your gitlab access token here";
+    private static String gitlabkey = "";// put your gitlab access token here";
     ListView listView;
     String[] vals = {"<New Task>"};
     static Context ctxt;
@@ -32,6 +39,45 @@ public class TaskLabAct extends Activity {
         ctxt=this;
         setContentView(R.layout.main);
         showList();
+
+        String k=PrefUtils.getFromPrefs(ctxt, "TASKLABKEY","");
+        if (k.equals("")) askCreds();
+        else {
+            gitlabkey=k;
+        }
+    }
+    private void askCreds() {
+        class LoginDialogFragment extends DialogFragment {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setView(inflater.inflate(R.layout.dialog_signin, null))
+                        // Add action buttons
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                TextView username = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.username);
+                                gitlabkey = username.getText().toString();
+                                PrefUtils.saveToPrefs(ctxt,"TASKLABKEY",gitlabkey);
+                            }
+                        })
+                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                LoginDialogFragment.this.getDialog().cancel();
+                            }
+                        });
+
+                return builder.create();
+			}
+		}
+		LoginDialogFragment dialog = new LoginDialogFragment();
+		dialog.show(getSupportFragmentManager(),"dgs signin");
+
     }
     private void showList() {
         this.runOnUiThread(new Runnable() {
