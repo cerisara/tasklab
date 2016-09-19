@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.widget.TextView;
 import java.util.Arrays;
 import android.app.Activity;
@@ -28,7 +29,8 @@ public class TaskLabAct extends FragmentActivity {
     private static String gitlabkey = "";// put your gitlab access token here";
     ListView listView;
     String[] vals = {"<New Task>"};
-    static Context ctxt;
+    public static Context ctxt;
+    public static TaskLabAct main;
 
     /** Called when the activity is first created. */
     @Override
@@ -36,6 +38,7 @@ public class TaskLabAct extends FragmentActivity {
     {
         super.onCreate(savedInstanceState);
         ctxt=this;
+        main=this;
         setContentView(R.layout.main);
         showList();
 
@@ -44,7 +47,55 @@ public class TaskLabAct extends FragmentActivity {
         else {
             gitlabkey=k;
         }
+        Intent in = this.getIntent();
+        System.out.println("ONCREATE INTENT "+in.toString());
+        if (in.getAction().equals(Intent.ACTION_SEND)) getNewStringFromShareMenu(in);
+        addNewTasks();
     }
+
+    private void msg(final String s) {
+        main.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(main, s, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void addNewTasks() {
+        String k=PrefUtils.getFromPrefs(ctxt,"TASKLABDAT","");
+        if (k.length()>0) {
+            String[] kk = k.split(" &_@ ");
+            for (String z : kk) {
+                vals[vals.length-1]=z;
+                String[] vals2 = new String[vals.length+1];
+                System.arraycopy(vals,0,vals2,0,vals.length);
+                vals=vals2;
+                vals[vals.length-1]="<New Task>";
+            }
+        }
+        showList();
+    }
+
+    private void getNewStringFromShareMenu(Intent in) {
+        Object o = in.getExtras().get("android.intent.extra.TEXT");
+        if (o!=null) {
+            String s=(String)o;
+            // temporary store the data for future upload
+            String k=PrefUtils.getFromPrefs(ctxt,"TASKLABDAT","");
+            k=k+" &_@ "+s;
+            PrefUtils.saveToPrefs(ctxt,"TASKLABDAT",k);
+            main.msg("Share OK "+s.length()+" "+k.length());
+        } else {
+            main.msg("WARNING: nothing to share");
+        }
+    }
+
+    @Override
+    public void onNewIntent(Intent in) {
+        System.out.println("ONNEWINTENT "+in.toString());
+        if (in.getAction().equals(Intent.ACTION_SEND)) getNewStringFromShareMenu(in);
+    }
+
     private void editTask(final int taskid) {
         class LoginDialogFragment extends DialogFragment {
 			@Override
@@ -68,7 +119,7 @@ public class TaskLabAct extends FragmentActivity {
                                 vals[taskid]=s;
                                 if (taskid>=vals.length) {
                                     String[] vals2 = new String[vals.length+1];
-                                    System.arraycopy(vals,0,vals2,0,vals.length+1);
+                                    System.arraycopy(vals,0,vals2,0,vals.length);
                                     vals=vals2;
                                     vals[vals.length-1]="<New Task>";
                                 }
@@ -198,17 +249,20 @@ public class TaskLabAct extends FragmentActivity {
                         // TODO handle priorities
                         // TODO manage conflicts
                         int i=str.indexOf("content\":\"");
-                        if (i>=0) {
+                        if (i>=0 && typ==0) {
                             i+=10;
                             int j=str.indexOf("\"",i);
                             byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
                             str = new String(tmp2, "UTF-8");
-                            if (typ==0) {
-                                if (str.charAt(str.length()-1)!='\n') str+='\n';
-                                str+="<New Task>";
-                                vals=str.split("\n");
-                                showList();
-                            }
+                            if (str.charAt(str.length()-1)!='\n') str+='\n';
+                            str+="<New Task>";
+                            vals=str.split("\n");
+                            main.msg("Pull OK");
+                            addNewTasks();
+                            showList();
+                        } else if (typ==1) {
+                            PrefUtils.saveToPrefs(ctxt,"TASKLABDAT","");
+                            main.msg("Push OK");
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -266,9 +320,8 @@ public class TaskLabAct extends FragmentActivity {
             }
 
             if (success) {
-                Toast.makeText(ctxt, "Successfully connected", Toast.LENGTH_LONG).show();
             } else {
-                Toast.makeText(ctxt, "Error", Toast.LENGTH_LONG).show();
+                main.msg("Error postexec");
             }
         }
     }
