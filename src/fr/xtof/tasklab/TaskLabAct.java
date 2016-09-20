@@ -40,19 +40,42 @@ public class TaskLabAct extends FragmentActivity {
         super.onCreate(savedInstanceState);
         ctxt=this;
         main=this;
-        vals.add("<New Task>");
         setContentView(R.layout.main);
-        showList();
 
         String k=PrefUtils.getFromPrefs(ctxt, "TASKLABKEY","");
         if (k.equals("")) askCreds();
         else {
             gitlabkey=k;
         }
+
+        getCurTasks();
+
         Intent in = this.getIntent();
         System.out.println("ONCREATE INTENT "+in.toString());
         if (in.getAction().equals(Intent.ACTION_SEND)) getNewStringFromShareMenu(in);
-        addNewTasks();
+    }
+
+    /* Store all current tasks in store.
+     * When pressing "GET" erases all current tasks with the ones from the server (TODO: ask for confirm)
+     * When pressing "PUT" uploads current tasks onto the server
+     */
+    private void getCurTasks() {
+        vals.clear();
+        String k=PrefUtils.getFromPrefs(ctxt,"TASKLABDAT","");
+        String[] kk = k.split(" &_@ ");
+        for (String z : kk) vals.add(z);
+        vals.add("<New Task>");
+        showList();
+    }
+    private void setCurTasks() {
+        String k="";
+        if (vals.size()>0) k=vals.get(0);
+        for (int i=1;i<vals.size()-1;i++) k=k+" &_@ "+vals.get(i);
+        PrefUtils.saveToPrefs(ctxt,"TASKLABDAT",k);
+    }
+    private void addNewTask() {
+        vals.add("<New Task>");
+        showList();
     }
 
     private void msg(final String s) {
@@ -63,27 +86,14 @@ public class TaskLabAct extends FragmentActivity {
         });
     }
 
-    private void addNewTasks() {
-        String k=PrefUtils.getFromPrefs(ctxt,"TASKLABDAT","");
-        if (k.length()>0) {
-            String[] kk = k.split(" &_@ ");
-            for (String z : kk) {
-                vals.set(vals.size()-1,z);
-                vals.add("<New Task>");
-            }
-        }
-        showList();
-    }
-
     private void getNewStringFromShareMenu(Intent in) {
         Object o = in.getExtras().get("android.intent.extra.TEXT");
         if (o!=null) {
             String s=(String)o;
-            // temporary store the data for future upload
-            String k=PrefUtils.getFromPrefs(ctxt,"TASKLABDAT","");
-            k=k+" &_@ "+s;
-            PrefUtils.saveToPrefs(ctxt,"TASKLABDAT",k);
-            main.msg("Share OK "+s.length()+" "+k.length());
+            vals.set(vals.size()-1,s);
+            addNewTask();
+            setCurTasks();
+            main.msg("Share OK "+s.length());
         } else {
             main.msg("WARNING: nothing to share");
         }
@@ -102,10 +112,14 @@ public class TaskLabAct extends FragmentActivity {
 				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 				// Get the layout inflater
 				LayoutInflater inflater = getActivity().getLayoutInflater();
+                View custv = inflater.inflate(R.layout.dialog_edit, null);
+                // recopy the old task text to edit
+                TextView txt = (TextView)custv.findViewById(R.id.taskdef);
+                txt.setText(vals.get(taskid));
 
 				// Inflate and set the layout for the dialog
                 // Pass null as the parent view because its going in the dialog layout
-                builder.setView(inflater.inflate(R.layout.dialog_edit, null))
+                builder.setView(custv)
                         // Add action buttons
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
@@ -116,9 +130,8 @@ public class TaskLabAct extends FragmentActivity {
                                 // il nous faut une seule ligne par task
                                 s=s.replace('\n',' ');
                                 vals.set(taskid,s);
-                                if (taskid>=vals.size()) {
-                                    vals.add("<New Task>");
-                                }
+                                if (taskid>=vals.size()-1) vals.add("<New Task>");
+                                setCurTasks();
                                 showList();
                             }
                         })
@@ -193,8 +206,16 @@ public class TaskLabAct extends FragmentActivity {
 
     /** Called when the user touches the button */
     public void geturl(View view) {
-        DetProgressTask dett = new DetProgressTask(0,"");
-        dett.execute();
+        new AlertDialog.Builder(this)
+            .setTitle("Download tasks")
+            .setMessage("Do you really want to erase your tasks with tasks from the server?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        DetProgressTask dett = new DetProgressTask(0,"");
+                        dett.execute();
+                    }})
+         .setNegativeButton(android.R.string.no, null).show();
     }
 
     public void putfile(View view) {
@@ -256,11 +277,10 @@ public class TaskLabAct extends FragmentActivity {
                             if (str.length()==0||str.charAt(str.length()-1)!='\n') str+='\n';
                             str+="<New Task>";
                             vals=new ArrayList(Arrays.asList(str.split("\n")));
+                            setCurTasks();
                             main.msg("Pull OK");
-                            addNewTasks();
                             showList();
                         } else if (typ==1) {
-                            PrefUtils.saveToPrefs(ctxt,"TASKLABDAT","");
                             main.msg("Push OK");
                         }
                     } catch (Exception e) {
