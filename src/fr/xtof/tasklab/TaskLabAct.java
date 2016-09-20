@@ -24,11 +24,12 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import com.loopj.android.http.*;
+import java.util.ArrayList;
 
 public class TaskLabAct extends FragmentActivity {
     private static String gitlabkey = "";// put your gitlab access token here";
     ListView listView;
-    String[] vals = {"<New Task>"};
+    ArrayList<String> vals = new ArrayList();
     public static Context ctxt;
     public static TaskLabAct main;
 
@@ -39,6 +40,7 @@ public class TaskLabAct extends FragmentActivity {
         super.onCreate(savedInstanceState);
         ctxt=this;
         main=this;
+        vals.add("<New Task>");
         setContentView(R.layout.main);
         showList();
 
@@ -66,11 +68,8 @@ public class TaskLabAct extends FragmentActivity {
         if (k.length()>0) {
             String[] kk = k.split(" &_@ ");
             for (String z : kk) {
-                vals[vals.length-1]=z;
-                String[] vals2 = new String[vals.length+1];
-                System.arraycopy(vals,0,vals2,0,vals.length);
-                vals=vals2;
-                vals[vals.length-1]="<New Task>";
+                vals.set(vals.size()-1,z);
+                vals.add("<New Task>");
             }
         }
         showList();
@@ -116,12 +115,9 @@ public class TaskLabAct extends FragmentActivity {
                                 String s = txt.getText().toString();
                                 // il nous faut une seule ligne par task
                                 s=s.replace('\n',' ');
-                                vals[taskid]=s;
-                                if (taskid>=vals.length) {
-                                    String[] vals2 = new String[vals.length+1];
-                                    System.arraycopy(vals,0,vals2,0,vals.length);
-                                    vals=vals2;
-                                    vals[vals.length-1]="<New Task>";
+                                vals.set(taskid,s);
+                                if (taskid>=vals.size()) {
+                                    vals.add("<New Task>");
                                 }
                                 showList();
                             }
@@ -173,6 +169,9 @@ public class TaskLabAct extends FragmentActivity {
 
     }
     private void showList() {
+        // clean up vals
+        for (int i=vals.size()-1;i>=0;i--)
+            if (vals.get(i).length()==0) vals.remove(i);
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -200,8 +199,8 @@ public class TaskLabAct extends FragmentActivity {
 
     public void putfile(View view) {
         String s="";
-        for (int i=0;i<vals.length-1;i++) { // not the last <new task>
-            s+=vals[i]+'\n';
+        for (int i=0;i<vals.size()-1;i++) { // not the last <new task>
+            s+=vals.get(i)+'\n';
         }
         s=s.substring(0,s.length()-1);
         try {
@@ -254,9 +253,9 @@ public class TaskLabAct extends FragmentActivity {
                             int j=str.indexOf("\"",i);
                             byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
                             str = new String(tmp2, "UTF-8");
-                            if (str.charAt(str.length()-1)!='\n') str+='\n';
+                            if (str.length()==0||str.charAt(str.length()-1)!='\n') str+='\n';
                             str+="<New Task>";
-                            vals=str.split("\n");
+                            vals=new ArrayList(Arrays.asList(str.split("\n")));
                             main.msg("Pull OK");
                             addNewTasks();
                             showList();
