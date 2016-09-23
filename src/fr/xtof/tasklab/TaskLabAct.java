@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.widget.TextView;
 import java.util.Arrays;
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.app.ProgressDialog;
@@ -63,7 +62,7 @@ public class TaskLabAct extends FragmentActivity {
         vals.clear();
         String k=PrefUtils.getFromPrefs(ctxt,"TASKLABDAT","");
         String[] kk = k.split(" &_@ ");
-        for (String z : kk) vals.add(z);
+        vals.addAll(Arrays.asList(kk));
         vals.add("<New Task>");
         showList();
     }
@@ -196,7 +195,7 @@ public class TaskLabAct extends FragmentActivity {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         int itemPosition     = position;
-                        String  itemValue    = (String) listView.getItemAtPosition(position);
+                        // String  itemValue    = (String) listView.getItemAtPosition(position);
                         editTask(itemPosition);
                     }
                 });
