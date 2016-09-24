@@ -18,3 +18,19 @@ Now, because git pull/push is not so easy to do in android, the idea here is to 
 Ultimately, a companion desktop app or web service should be done to get a similar service on your desktop, but this is less urgent
 as you can always for now access this todo list with any git client, or on the gitlab web page.
 
+## Usage
+
+- First create an empty repository, let us call it *todorep* in a gitlab server, for instance in gitlab.com or on your own gitlab instance.
+- Then, on a desktop computer with git and connected with your gitlab server, add, commit and push a single file named "todo.txt" at the root of *todorep*. You may populate your todo.txt file with a few tasks (one per line), or just leave it empty for now.
+- The app synchronizes through the gitlab API; so you need to create a *private token* in your gitlab instance (see [the gitlab doc](https://docs.gitlab.com/ce/api)); the app will ask for this token the first time you run it.
+- When you first run the app, it will ask for the url of your gitlab repo and your private token
+- You can then press "GET" to download the HEAD version of your todo list from the gitlab server
+- You can edit any line in your todo list by cliking once on it
+- To add a new task, you just click on the bottom *New Task* line
+- From outside the app, you can also add a new "task" by using the "share via" popup menu (for instance when you're browsing); in that case, simply choose the TaskLabApp in the share menu and the url will be added to your task list. This is a good option to store interesting references that you would like to access later on
+- When you're connected to the internet, you should push your locally modified task list to the gitlab server by pressing the "PUT" button
+
+## Limitations
+
+- No support for conflicts; but in a normal usage with frequent synchronizations, conflicts should not happen; if they still do, it is easy to solve them with git on a PC. In all cases, the "Get" button in the app will warn and just download the HEAD repository file.
+
