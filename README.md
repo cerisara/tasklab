@@ -34,3 +34,12 @@ as you can always for now access this todo list with any git client, or on the g
 
 - No support for conflicts; but in a normal usage with frequent synchronizations, conflicts should not happen; if they still do, it is easy to solve them with git on a PC. In all cases, the "Get" button in the app will warn and just download the HEAD repository file.
 
+## Disclaimer
+
+For now, the URL to the gitlab repository is still hard-coded; I still have to pop-up
+a window to ask for it. But there is one trick to consider, because the app has then to
+get the repository ID from its name. All this is less than an hour of work to do, but
+I still couldn't find a free hour yet ;-)
+(and also because I don't need this feature for my personal usage ;-) )
+But if you're interested, drop an issue, and I'll take that hour to make the app more generic.
+
