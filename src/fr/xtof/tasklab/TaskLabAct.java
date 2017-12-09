@@ -42,7 +42,7 @@ public class TaskLabAct extends FragmentActivity {
         setContentView(R.layout.main);
 
         String k=PrefUtils.getFromPrefs(ctxt, "TASKLABKEY","");
-        if (k.equals("")) askCreds();
+        if (k.equals("")) askCreds(null);
         else {
             gitlabkey=k;
         }
@@ -147,7 +147,16 @@ public class TaskLabAct extends FragmentActivity {
 		dialog.show(getSupportFragmentManager(),"edit task");
     }
 
-    private void askCreds() {
+	
+    private interface TextConsumer {
+	    public void newText(String s);
+    }
+
+    private void detdialog(String msg, TextConsumer fct) {
+
+    }
+
+    public void askCreds(View view) {
         class LoginDialogFragment extends DialogFragment {
 			@Override
 			public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -216,7 +225,11 @@ public class TaskLabAct extends FragmentActivity {
                     }})
          .setNegativeButton(android.R.string.no, null).show();
     }
-
+    public void reset(View view) {
+	PrefUtils.saveToPrefs(ctxt,"TASKLABKEY","");
+	gitlabkey="";
+	askCreds(null);
+    }
     public void putfile(View view) {
         String s="";
         for (int i=0;i<vals.size()-1;i++) { // not the last <new task>
@@ -307,8 +320,8 @@ public class TaskLabAct extends FragmentActivity {
                 }
             };
 
-            if (typ==1) client.put("http://152.81.128.46:8888/api/v3/projects/88/repository/files?private_token="+gitlabkey+"&file_path=todo.txt&branch_name=master&content="+url+"&commit_message=update%20file", rephdl);
-            else client.get("http://152.81.128.46:8888/api/v3/projects/88/repository/files?private_token="+gitlabkey+"&file_path=todo.txt&ref=master", rephdl);
+            if (typ==1) client.put("http://152.81.128.46:8888/api/v4/projects/88/repository/files/todo.txt?private_token="+gitlabkey+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
+            else client.get("http://152.81.128.46:8888/api/v4/projects/88/repository/files/todo.txt?private_token="+gitlabkey+"&ref=master", rephdl);
         }
 
         /** progress dialog to show user that the backup is processing. */
