@@ -321,7 +321,7 @@ public class TaskLabAct extends FragmentActivity {
             };
 
             if (typ==1) client.put("http://152.81.128.46:8888/api/v4/projects/88/repository/files/todo.txt?private_token="+gitlabkey+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
-            else client.get("http://152.81.128.46:8888/api/v4/projects/88/repository/files/todo.txt?private_token="+gitlabkey+"&ref=master", rephdl);
+            else client.get("http://152.81.128.46:8888/api/v4/projects/88/repository/files/todo.txt?private_token="+gitlabkey+"&ref=master&branch=master", rephdl);
         }
 
         /** progress dialog to show user that the backup is processing. */
