@@ -280,7 +280,7 @@ public class TaskLabAct extends FragmentActivity {
                         // TODO parse the JSON
                         // TODO handle priorities
                         // TODO manage conflicts
-                        int i=str.indexOf("content\":\"");
+                        int i=str.indexOf("content=>\"");
                         if (i>=0 && typ==0) {
                             i+=10;
                             int j=str.indexOf("\"",i);
