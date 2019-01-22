@@ -23,7 +23,10 @@ as you can always for now access this todo list with any git client, or on the g
 - First create an empty repository, let us call it *todorep* in a gitlab server, for instance in gitlab.com or on your own gitlab instance.
 - Then, on a desktop computer with git and connected with your gitlab server, add, commit and push a single file named "todo.txt" at the root of *todorep*. You may populate your todo.txt file with a few tasks (one per line), or just leave it empty for now.
 - The app synchronizes through the gitlab API; so you need to create a *private token* in your gitlab instance (see [the gitlab doc](https://docs.gitlab.com/ce/api)); the app will ask for this token the first time you run it.
-- When you first run the app, it will ask for the url of your gitlab repo and your private token
+- When you first run the app, it will ask for the url of your gitlab repo and your private token. The URL must point to your todo.txt; so it must be of the form (check your gitlab instance doc to find the correct URL; you just need to point to the todo.txt file, the private token and other options will be added by the app):
+	https://gitlab.domain.my/api/v4/projects/88/repository/files/todo.txt
+- You may get the project ID with, e.g.:
+	curl 'https://gitlab.domain.my/api/v4/projects?search=TOTO&owned=true&private_token=FDSFGJJGREIG'
 - You can then press "GET" to download the HEAD version of your todo list from the gitlab server
 - You can edit any line in your todo list by cliking once on it
 - To add a new task, you just click on the bottom *New Task* line
