@@ -29,6 +29,8 @@ import java.util.ArrayList;
 public class TaskLabAct extends FragmentActivity {
 	private static String gitlabkey = "";
 	private static String gitlaburl = "";
+	private static String zimbrausr = "";
+	private static String zimbrapwd = "";
 	ListView listView;
 	ArrayList<String> vals = new ArrayList();
 	public static Context ctxt;
@@ -43,12 +45,14 @@ public class TaskLabAct extends FragmentActivity {
 		main=this;
 		setContentView(R.layout.main);
 
-		String k=PrefUtils.getFromPrefs(ctxt, "TASKLABKEY","");
-		if (k.equals("")) askCreds(null);
-		else {
-			gitlabkey=k;
-			gitlaburl=PrefUtils.getFromPrefs(ctxt, "TASKLABURL","");
-		}
+        String k=PrefUtils.getFromPrefs(ctxt, "TASKLABKEY","");
+        if (k.equals("")) askCreds(null);
+        else {
+            gitlabkey=k;
+            gitlaburl=PrefUtils.getFromPrefs(ctxt, "TASKLABURL","");
+        }
+        zimbrausr=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAUSER","");
+        zimbrapwd=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAPWD","");
 
 		getCurTasks();
 
@@ -230,6 +234,71 @@ public class TaskLabAct extends FragmentActivity {
 		// Button theButton = dialog.getDialog().getButton(DialogInterface.BUTTON_NEUTRAL);
 		// theButton.setOnClickListener(new CustomListener(dialog));
 	}
+
+	public void askCredsZimbra() {
+		class CustomListener implements View.OnClickListener {
+			private final Dialog dialog;
+
+			public CustomListener(Dialog dialog) {
+				this.dialog = dialog;
+			}
+
+			@Override
+			public void onClick(View v) {
+				TextView glaburl = (TextView) dialog.findViewById(R.id.zimbrausr);
+				TextView glabtok = (TextView) dialog.findViewById(R.id.zimbrapwd);
+				glaburl.invalidate();
+				glabtok.invalidate();
+
+				// If you want to close the dialog, uncomment the line below
+				//dialog.dismiss();
+			}
+		}
+		class LoginDialogFragment extends DialogFragment {
+			public void setTok() {
+			}
+
+			@Override
+			public void onResume() {
+				super.onResume();
+			}
+
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				// Get the layout inflater
+				LayoutInflater inflater = getActivity().getLayoutInflater();
+
+				// Inflate and set the layout for the dialog
+				// Pass null as the parent view because its going in the dialog layout
+				builder.setView(inflater.inflate(R.layout.dialog_zimbra, null))
+					// Add action buttons
+					.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int id) {
+							TextView glaburl = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.zimbrausr);
+							TextView glabtok = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.zimbrapwd);
+							gitlabkey = glabtok.getText().toString();
+							gitlaburl = glaburl.getText().toString();
+							PrefUtils.saveToPrefs(ctxt,"ZIMBRAUSR",gitlabkey);
+							PrefUtils.saveToPrefs(ctxt,"ZIMBRAPWD",gitlaburl);
+						}
+					})
+				.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						LoginDialogFragment.this.getDialog().cancel();
+					}
+				});
+
+				return builder.create();
+			}
+		}
+		LoginDialogFragment dialog = new LoginDialogFragment();
+		dialog.show(getSupportFragmentManager(),"zimbra");
+		// Button theButton = dialog.getDialog().getButton(DialogInterface.BUTTON_NEUTRAL);
+		// theButton.setOnClickListener(new CustomListener(dialog));
+	}
+
 	private void showList() {
 		// clean up vals
 		for (int i=vals.size()-1;i>=0;i--)
@@ -271,6 +340,14 @@ public class TaskLabAct extends FragmentActivity {
 		//gitlabkey="";
 		askCreds(null);
 	}
+    public void zimbra(View view) {
+		if (zimbrausr.equals("")) askCredsZimbra();
+		else {
+            if (!(zimbrausr.equals("") && zimbrapwd.equals(""))) {
+                boolean res = Zimbra.getNewCal(zimbrausr,zimbrapwd);
+            }
+        }
+    }
 	public void putfile(View view) {
 		String s="";
 		for (int i=0;i<vals.size()-1;i++) { // not the last <new task>

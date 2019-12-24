@@ -40,6 +40,17 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="ZIMBRA"
+        android:onClick="zimbra"
+        />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />    
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="PUT"
         android:onClick="putfile"
         />

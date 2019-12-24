@@ -10,6 +10,7 @@ export ANDBIN=/opt/android-sdk/build-tools/24.0.0/
 export ANDJAR=/opt/android-sdk/platforms/android-19/android.jar
 
 export ANDBIN=/usr/lib/android-sdk/build-tools/24.0.0/
+export ANDBIN=/usr/lib/android-sdk/build-tools/27.0.1/
 export ANDJAR=/usr/lib/android-sdk/platforms/android-23/android.jar
 
 rm -rf out
@@ -56,6 +57,8 @@ $ANDBIN/aapt add app.apk classes.dex
 
 # run it once in your HOME:
 # keytool -genkey -v -keystore PATH/TO/YOUR_RELEASE_KEY.keystore -alias YOUR_ALIAS_NAME -keyalg RSA -keysize 2048 -validity 10000
+
+echo "$signerpass"
 
 jarsigner -verbose -keystore $HOME/maclef.keystore -storepass $signerpass -keypass $signerpass -sigalg SHA1withRSA -digestalg SHA1 app.apk xtof54
 
