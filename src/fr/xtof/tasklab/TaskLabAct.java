@@ -35,6 +35,7 @@ public class TaskLabAct extends FragmentActivity {
 	ArrayList<String> vals = new ArrayList();
 	public static Context ctxt;
 	public static TaskLabAct main;
+    private boolean zimbramode = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -51,7 +52,7 @@ public class TaskLabAct extends FragmentActivity {
             gitlabkey=k;
             gitlaburl=PrefUtils.getFromPrefs(ctxt, "TASKLABURL","");
         }
-        zimbrausr=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAUSER","");
+        zimbrausr=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAUSR","");
         zimbrapwd=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAPWD","");
 
 		getCurTasks();
@@ -73,6 +74,12 @@ public class TaskLabAct extends FragmentActivity {
 		vals.add("<New Task>");
 		showList();
 	}
+    // called from Zimbra
+    public void showCal(ArrayList events) {
+   		vals.clear();
+		vals.addAll(events);
+		showList();
+    }
 	private void setCurTasks() {
 		String k="";
 		if (vals.size()>0) k=vals.get(0);
@@ -282,6 +289,8 @@ public class TaskLabAct extends FragmentActivity {
 							gitlaburl = glaburl.getText().toString();
 							PrefUtils.saveToPrefs(ctxt,"ZIMBRAUSR",gitlabkey);
 							PrefUtils.saveToPrefs(ctxt,"ZIMBRAPWD",gitlaburl);
+                            zimbrausr = gitlabkey;
+                            zimbrapwd = gitlaburl;
 						}
 					})
 				.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -324,31 +333,46 @@ public class TaskLabAct extends FragmentActivity {
 
 	/** Called when the user touches the GET button */
 	public void geturl(View view) {
-		new AlertDialog.Builder(this)
-			.setTitle("Download tasks")
-			.setMessage("Do you really want to erase your tasks with tasks from the server?")
-			.setIcon(android.R.drawable.ic_dialog_alert)
-			.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int whichButton) {
-					DetProgressTask dett = new DetProgressTask(0,"");
-					dett.execute();
-				}})
-		.setNegativeButton(android.R.string.no, null).show();
+        if (zimbramode) {
+            if (!(zimbrausr.equals("") && zimbrapwd.equals(""))) {
+                Zimbra.getNewCal(zimbrausr,zimbrapwd);
+            }
+        } else {
+            new AlertDialog.Builder(this)
+                .setTitle("Download tasks")
+                .setMessage("Do you really want to erase your tasks with tasks from the server?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        DetProgressTask dett = new DetProgressTask(0,"");
+                        dett.execute();
+                    }})
+            .setNegativeButton(android.R.string.no, null).show();
+        }
 	}
 	public void reset(View view) {
+        if (zimbramode) {
+            askCredsZimbra();
+            return;
+        }
 		//PrefUtils.saveToPrefs(ctxt,"TASKLABKEY","");
 		//gitlabkey="";
 		askCreds(null);
 	}
     public void zimbra(View view) {
-		if (zimbrausr.equals("")) askCredsZimbra();
-		else {
-            if (!(zimbrausr.equals("") && zimbrapwd.equals(""))) {
-                boolean res = Zimbra.getNewCal(zimbrausr,zimbrapwd);
-            }
+        if (zimbramode) {
+            getCurTasks();
+        } else {
+            if (zimbrausr.equals("")) askCredsZimbra();
+            Zimbra.showCal();
         }
+        zimbramode = !zimbramode;
     }
 	public void putfile(View view) {
+        if (zimbramode) {
+            // alert("push2zimbra not implemented");
+            return;
+        }
 		String s="";
 		for (int i=0;i<vals.size()-1;i++) { // not the last <new task>
 			s+=vals.get(i)+'\n';
