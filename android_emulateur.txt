@@ -1,0 +1,14 @@
+ce qui marche:
+
+NAT network avec cable connected et un port forward de 5555 vers 5555 (sans IP)
+
+dans android terminal emulator:
+su
+setprop service.adb.tcp.port 5555
+stop adbd
+start adbd
+
+en linux:
+adb kill-server
+adb devices -l
+

@@ -36,6 +36,7 @@ public class TaskLabAct extends FragmentActivity {
 	public static Context ctxt;
 	public static TaskLabAct main;
     private boolean zimbramode = false;
+    private String fromshare = null;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -59,6 +60,7 @@ public class TaskLabAct extends FragmentActivity {
 
 		Intent in = this.getIntent();
 		System.out.println("ONCREATE INTENT "+in.toString());
+        fromshare = null;
 		if (in.getAction().equals(Intent.ACTION_SEND)) getNewStringFromShareMenu(in);
 	}
 
@@ -100,9 +102,11 @@ public class TaskLabAct extends FragmentActivity {
 	}
 
 	private void getNewStringFromShareMenu(Intent in) {
+        fromshare = null;
 		Object o = in.getExtras().get("android.intent.extra.TEXT");
 		if (o!=null) {
 			String s=(String)o;
+            fromshare = ""+s;
 			vals.set(vals.size()-1,s);
 			addNewTask();
 			setCurTasks();
@@ -114,6 +118,7 @@ public class TaskLabAct extends FragmentActivity {
 
 	@Override
 	public void onNewIntent(Intent in) {
+        fromshare = null;
 		System.out.println("ONNEWINTENT "+in.toString());
 		if (in.getAction().equals(Intent.ACTION_SEND)) getNewStringFromShareMenu(in);
 	}
@@ -340,7 +345,7 @@ public class TaskLabAct extends FragmentActivity {
         } else {
             new AlertDialog.Builder(this)
                 .setTitle("Download tasks")
-                .setMessage("Do you really want to erase your tasks with tasks from the server?")
+                .setMessage("Do you really want to erase your tasks with tasks from the server? (the text from share will be kept)")
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
@@ -370,7 +375,7 @@ public class TaskLabAct extends FragmentActivity {
     }
 	public void putfile(View view) {
         if (zimbramode) {
-            // alert("push2zimbra not implemented");
+            main.msg("push2zimbra not implemented");
             return;
         }
 		String s="";
@@ -429,6 +434,7 @@ public class TaskLabAct extends FragmentActivity {
 							byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
 							str = new String(tmp2, "UTF-8");
 							if (str.length()==0||str.charAt(str.length()-1)!='\n') str+='\n';
+                            if (fromshare!=null) str+=fromshare+'\n';
 							str+="<New Task>";
 							vals=new ArrayList(Arrays.asList(str.split("\n")));
 							setCurTasks();
