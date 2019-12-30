@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.content.Context;
 import java.lang.Exception;
 import java.net.URLEncoder;
+import java.net.URL;
 import cz.msebera.android.httpclient.*;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
@@ -25,10 +26,19 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import com.loopj.android.http.*;
 import java.util.ArrayList;
+import java.util.Scanner;
+import javax.net.ssl.HttpsURLConnection;
+import java.net.HttpURLConnection;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 
 public class TaskLabAct extends FragmentActivity {
-	private static String gitlabkey = "";
+	private static String gitlabpwd = "";
+	private static String gitlabusr = "";
 	private static String gitlaburl = "";
+	private static String gitlabtok = null;
+
 	private static String zimbrausr = "";
 	private static String zimbrapwd = "";
 	ListView listView;
@@ -47,11 +57,12 @@ public class TaskLabAct extends FragmentActivity {
 		main=this;
 		setContentView(R.layout.main);
 
-        String k=PrefUtils.getFromPrefs(ctxt, "TASKLABKEY","");
+        String k=PrefUtils.getFromPrefs(ctxt, "TASKLABPWD","");
         if (k.equals("")) askCreds(null);
         else {
-            gitlabkey=k;
+            gitlabpwd=k;
             gitlaburl=PrefUtils.getFromPrefs(ctxt, "TASKLABURL","");
+            gitlabusr=PrefUtils.getFromPrefs(ctxt, "TASKLABUSR","");
         }
         zimbrausr=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAUSR","");
         zimbrapwd=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAPWD","");
@@ -186,11 +197,14 @@ public class TaskLabAct extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				TextView glaburl = (TextView) dialog.findViewById(R.id.usernameurl);
-				TextView glabtok = (TextView) dialog.findViewById(R.id.usernametok);
+				TextView glabusr = (TextView) dialog.findViewById(R.id.usernameusr);
+				TextView glabpwd = (TextView) dialog.findViewById(R.id.usernamepwd);
 				glaburl.setText(gitlaburl);
-				glabtok.setText(gitlabkey);
+				glabusr.setText(gitlabusr);
+				glabpwd.setText(gitlabpwd);
 				glaburl.invalidate();
-				glabtok.invalidate();
+				glabusr.invalidate();
+				glabpwd.invalidate();
 
 				// If you want to close the dialog, uncomment the line below
 				//dialog.dismiss();
@@ -204,11 +218,14 @@ public class TaskLabAct extends FragmentActivity {
 			public void onResume() {
 				super.onResume();
 				TextView glaburl = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernameurl);
-				TextView glabtok = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernametok);
+				TextView glabusr = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernameusr);
+				TextView glabpwd = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernamepwd);
 				glaburl.setText(gitlaburl);
-				glabtok.setText(gitlabkey);
+				glabusr.setText(gitlabusr);
+				glabpwd.setText(gitlabpwd);
 				glaburl.invalidate();
-				glabtok.invalidate();
+				glabusr.invalidate();
+				glabpwd.invalidate();
 			}
 
 			@Override
@@ -225,11 +242,14 @@ public class TaskLabAct extends FragmentActivity {
 						@Override
 						public void onClick(DialogInterface dialog, int id) {
 							TextView glaburl = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernameurl);
-							TextView glabtok = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernametok);
-							gitlabkey = glabtok.getText().toString();
+							TextView glabusr = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernameusr);
+							TextView glabpwd = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.usernamepwd);
+							gitlabpwd = glabpwd.getText().toString();
 							gitlaburl = glaburl.getText().toString();
-							PrefUtils.saveToPrefs(ctxt,"TASKLABKEY",gitlabkey);
+							gitlabusr = glabusr.getText().toString();
+							PrefUtils.saveToPrefs(ctxt,"TASKLABPWD",gitlabpwd);
 							PrefUtils.saveToPrefs(ctxt,"TASKLABURL",gitlaburl);
+							PrefUtils.saveToPrefs(ctxt,"TASKLABUSR",gitlabusr);
 						}
 					})
 				.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -259,6 +279,8 @@ public class TaskLabAct extends FragmentActivity {
 			public void onClick(View v) {
 				TextView glaburl = (TextView) dialog.findViewById(R.id.zimbrausr);
 				TextView glabtok = (TextView) dialog.findViewById(R.id.zimbrapwd);
+				glaburl.setText(zimbrausr);
+				glabtok.setText(zimbrapwd);
 				glaburl.invalidate();
 				glabtok.invalidate();
 
@@ -273,6 +295,12 @@ public class TaskLabAct extends FragmentActivity {
 			@Override
 			public void onResume() {
 				super.onResume();
+				TextView glaburl = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.zimbrausr);
+				TextView glabtok = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.zimbrapwd);
+				glaburl.setText(zimbrausr);
+				glabtok.setText(zimbrapwd);
+				glaburl.invalidate();
+				glabtok.invalidate();
 			}
 
 			@Override
@@ -290,12 +318,10 @@ public class TaskLabAct extends FragmentActivity {
 						public void onClick(DialogInterface dialog, int id) {
 							TextView glaburl = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.zimbrausr);
 							TextView glabtok = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.zimbrapwd);
-							gitlabkey = glabtok.getText().toString();
-							gitlaburl = glaburl.getText().toString();
-							PrefUtils.saveToPrefs(ctxt,"ZIMBRAUSR",gitlabkey);
-							PrefUtils.saveToPrefs(ctxt,"ZIMBRAPWD",gitlaburl);
-                            zimbrausr = gitlabkey;
-                            zimbrapwd = gitlaburl;
+							zimbrausr = glaburl.getText().toString();
+							zimbrapwd = glabtok.getText().toString();
+							PrefUtils.saveToPrefs(ctxt,"ZIMBRAUSR",zimbrausr);
+							PrefUtils.saveToPrefs(ctxt,"ZIMBRAPWD",zimbrapwd);
 						}
 					})
 				.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -343,16 +369,28 @@ public class TaskLabAct extends FragmentActivity {
                 Zimbra.getNewCal(zimbrausr,zimbrapwd);
             }
         } else {
-            new AlertDialog.Builder(this)
-                .setTitle("Download tasks")
-                .setMessage("Do you really want to erase your tasks with tasks from the server? (the text from share will be kept)")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        DetProgressTask dett = new DetProgressTask(0,"");
-                        dett.execute();
-                    }})
-            .setNegativeButton(android.R.string.no, null).show();
+            if (gitlabtok==null) {
+                new AlertDialog.Builder(this)
+                    .setTitle("Gitlab OAuth")
+                    .setMessage("Going to get an OAuth token from Gitlab; you'll have to repress GET afterwards. OK ?")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            gitlabOAuth();
+                        }})
+                .setNegativeButton(android.R.string.no, null).show();
+            } else {
+                new AlertDialog.Builder(this)
+                    .setTitle("Download tasks")
+                    .setMessage("Do you really want to erase your tasks with tasks from the server? (the text from share will be kept)")
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            DetProgressTask dett = new DetProgressTask(0,"");
+                            dett.execute();
+                        }})
+                .setNegativeButton(android.R.string.no, null).show();
+            }
         }
 	}
 	public void reset(View view) {
@@ -360,8 +398,6 @@ public class TaskLabAct extends FragmentActivity {
             askCredsZimbra();
             return;
         }
-		//PrefUtils.saveToPrefs(ctxt,"TASKLABKEY","");
-		//gitlabkey="";
 		askCreds(null);
 	}
     public void zimbra(View view) {
@@ -391,8 +427,6 @@ public class TaskLabAct extends FragmentActivity {
 			e.printStackTrace();
 		}
 	}
-
-
 
 	private class DetProgressTask extends AsyncTask<String, Void, Boolean> {
 
@@ -460,7 +494,6 @@ public class TaskLabAct extends FragmentActivity {
 					}
 					System.out.println("ON FAILURE "+str);
 					System.out.println("ON FAILURE2 "+gitlaburl);
-					System.out.println("ON FAILURE3 "+gitlabkey);
 				}
 
 				@Override
@@ -470,8 +503,8 @@ public class TaskLabAct extends FragmentActivity {
 				}
 			};
 
-			if (typ==1) client.put(gitlaburl+"?private_token="+gitlabkey+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
-			else client.get(gitlaburl+"?private_token="+gitlabkey+"&ref=master&branch=master", rephdl);
+			// if (typ==1) client.put(gitlaburl+"?private_token="+gitlabkey+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
+			// else client.get(gitlaburl+"?private_token="+gitlabkey+"&ref=master&branch=master", rephdl);
 		}
 
 		/** progress dialog to show user that the backup is processing. */
@@ -506,5 +539,107 @@ public class TaskLabAct extends FragmentActivity {
 			}
 		}
 	}
+
+	private class GenericProgressTask extends AsyncTask<String, Void, Boolean> {
+		private ProgressDialog dialog = new ProgressDialog(ctxt);
+        Runnable f;
+
+		public GenericProgressTask(Runnable fct) {
+            f=fct;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			this.dialog.setMessage("Please wait");
+			this.dialog.show();
+		}
+
+		@Override
+		protected Boolean doInBackground(final String... args) {
+			try {
+				f.run();
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(final Boolean success) {
+			if (dialog.isShowing()) dialog.dismiss();
+			if (success) {
+			} else {
+				main.msg("Error postexec");
+			}
+		}
+	}
+
+
+    public void gitlabOAuth() {
+        GenericProgressTask oauthtask = new GenericProgressTask(new Runnable() {
+            public void run() {
+                // final String userpass = gitlabusr + ":" + gitlabpwd;
+                // final String basicAuth = "Basic " + Base64.encodeToString(userpass.getBytes(),Base64.DEFAULT);
+            try {
+                    final String url = gitlaburl+"/oauth/token";
+                    String urlParameters  = "grant_type=password"+
+                        "&username="+URLEncoder.encode(gitlabusr,"UTF-8")+
+                        "&password="+URLEncoder.encode(gitlabpwd,"UTF-8");
+                    byte[] postData       = urlParameters.getBytes();
+                    int    postDataLength = postData.length;
+                    URL uurl = new URL(url);
+                    HttpURLConnection con = (HttpURLConnection) uurl.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setReadTimeout(10000);
+                    con.setConnectTimeout(15000);
+                    con.setDoInput(true);
+                    con.setDoOutput(true);
+                    con.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded"); 
+                    con.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+                    con.setUseCaches( false );
+                    con.getOutputStream().write( postData );
+                    int status = con.getResponseCode();
+                    System.out.println("GITLAB STATUS "+status);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    String inputLine;
+                    StringBuffer content = new StringBuffer();
+                    while ((inputLine = in.readLine()) != null) {
+                        content.append(inputLine);
+                    }
+                    in.close();
+                    con.disconnect();
+                    System.out.println("GITLAB OK "+content);
+                } catch (Exception e) {
+                    System.out.println("GITLAB KO ");
+                    e.printStackTrace();
+                }
+
+                /*
+                try {
+                    String param = "grant_type=password"+
+                        "&username="+URLEncoder.encode(gitlabusr,"UTF-8")+
+                        "&login="+URLEncoder.encode(gitlabpwd,"UTF-8");
+                    URL url = new URL(gitlaburl+"/oauth/token?"+param);
+                    HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
+                    conn.setReadTimeout(10000);
+                    conn.setConnectTimeout(15000);
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.setDoOutput(true);
+
+                    String response= "";
+                    Scanner inStream = new Scanner(conn.getInputStream());
+                    while(inStream.hasNextLine()) response+=(inStream.nextLine());
+
+                    System.out.println("DETOAUTHTOKEN "+response);
+                }  catch (Exception e) {
+                    e.printStackTrace();
+                }
+                */
+            }
+        });
+        oauthtask.execute();
+   }
 
 }
