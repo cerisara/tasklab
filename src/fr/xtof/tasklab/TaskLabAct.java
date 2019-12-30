@@ -31,16 +31,18 @@ import javax.net.ssl.HttpsURLConnection;
 import java.net.HttpURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+/*
 import org.gitlab.api.GitlabAPI;
 import org.gitlab.api.TokenType;
 import org.gitlab.api.models.GitlabProject;
+*/
 
 public class TaskLabAct extends FragmentActivity {
 	private static String gitlabpwd = "";
 	private static String gitlabusr = "";
 	private static String gitlaburl = "";
 	private static String gitlabtok = null;
-    private static GitlabAPI gitlabapi = null;
+    // private static GitlabAPI gitlabapi = null;
 
     // assume that the user has a Gitlab repository with this name and file:
     private static final String reponame = "TODO";
@@ -71,6 +73,8 @@ public class TaskLabAct extends FragmentActivity {
             gitlaburl=PrefUtils.getFromPrefs(ctxt, "TASKLABURL","");
             gitlabusr=PrefUtils.getFromPrefs(ctxt, "TASKLABUSR","");
         }
+        gitlabtok=PrefUtils.getFromPrefs(ctxt, "GITLABTOK","");
+        if (gitlabtok.equals("")) gitlabtok=null;
         zimbrausr=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAUSR","");
         zimbrapwd=PrefUtils.getFromPrefs(TaskLabAct.ctxt, "ZIMBRAPWD","");
 
@@ -393,7 +397,9 @@ public class TaskLabAct extends FragmentActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            gitlabPull();
+                            DetProgressTask dett = new DetProgressTask(0,"");
+                            dett.execute();
+                            // gitlabPull();
                         }})
                 .setNegativeButton(android.R.string.no, null).show();
             }
@@ -509,8 +515,19 @@ public class TaskLabAct extends FragmentActivity {
 				}
 			};
 
-			if (typ==1) client.put(gitlaburl+"?private_token="+gitlabtok+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
-			// else client.get(gitlaburl+"?private_token="+gitlabkey+"&ref=master&branch=master", rephdl);
+			if (typ==1) client.put(gitlaburl+"/api/v4/projects/"+gitlabusr+"%2FTODO/repository/files/todo.txt?access_token="+gitlabtok+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
+			else {
+                try {
+                    String s = gitlaburl+"/api/v4/projects/"+
+                            URLEncoder.encode(gitlabusr+"/TODO","UTF-8")+
+                            "/repository/files/todo.txt?access_token="+gitlabtok+"&ref=master&branch=master";
+                    System.out.println("CALLDETGET "+s);
+                    client.get(s, rephdl);
+                } catch (Exception e) {
+                    System.out.println("CALLDETGET error encoding ");
+                    e.printStackTrace();
+                }
+            }
 		}
 
 		/** progress dialog to show user that the backup is processing. */
@@ -626,6 +643,7 @@ public class TaskLabAct extends FragmentActivity {
                             if (k>j) {
                                 gitlabtok = s.substring(j,k);
                                 msg("OAuth token retrieved");
+                                PrefUtils.saveToPrefs(ctxt,"GITLABTOK",gitlabtok);
                             } else msg("Problem with gitlab token ?");
                         } else msg("Problem with gitlab token ?");
                     } else msg("Problem with gitlab token ?");
@@ -638,6 +656,8 @@ public class TaskLabAct extends FragmentActivity {
         });
         oauthtask.execute();
     }
+
+/*
     public void gitlabPull() {
         GenericProgressTask task = new GenericProgressTask(new Runnable() {
             public void run() {
@@ -665,6 +685,6 @@ public class TaskLabAct extends FragmentActivity {
         });
         task.execute();
     }
-        
+*/        
  
 }
