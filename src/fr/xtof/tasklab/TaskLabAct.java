@@ -31,13 +31,20 @@ import javax.net.ssl.HttpsURLConnection;
 import java.net.HttpURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-
+import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.TokenType;
+import org.gitlab.api.models.GitlabProject;
 
 public class TaskLabAct extends FragmentActivity {
 	private static String gitlabpwd = "";
 	private static String gitlabusr = "";
 	private static String gitlaburl = "";
 	private static String gitlabtok = null;
+    private static GitlabAPI gitlabapi = null;
+
+    // assume that the user has a Gitlab repository with this name and file:
+    private static final String reponame = "TODO";
+    private static final String repofile = "todo.txt";
 
 	private static String zimbrausr = "";
 	private static String zimbrapwd = "";
@@ -386,8 +393,7 @@ public class TaskLabAct extends FragmentActivity {
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            DetProgressTask dett = new DetProgressTask(0,"");
-                            dett.execute();
+                            gitlabPull();
                         }})
                 .setNegativeButton(android.R.string.no, null).show();
             }
@@ -503,7 +509,7 @@ public class TaskLabAct extends FragmentActivity {
 				}
 			};
 
-			// if (typ==1) client.put(gitlaburl+"?private_token="+gitlabkey+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
+			if (typ==1) client.put(gitlaburl+"?private_token="+gitlabtok+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
 			// else client.get(gitlaburl+"?private_token="+gitlabkey+"&ref=master&branch=master", rephdl);
 		}
 
@@ -610,36 +616,55 @@ public class TaskLabAct extends FragmentActivity {
                     in.close();
                     con.disconnect();
                     System.out.println("GITLAB OK "+content);
+                    String s = content.toString();
+                    int i=s.indexOf("access_token");
+                    if (i>=0) {
+                        int j=s.indexOf(":",i);
+                        if (j>i) {
+                            j+=2;
+                            int k=s.indexOf("\"",j);
+                            if (k>j) {
+                                gitlabtok = s.substring(j,k);
+                                msg("OAuth token retrieved");
+                            } else msg("Problem with gitlab token ?");
+                        } else msg("Problem with gitlab token ?");
+                    } else msg("Problem with gitlab token ?");
                 } catch (Exception e) {
                     System.out.println("GITLAB KO ");
                     e.printStackTrace();
                 }
 
-                /*
-                try {
-                    String param = "grant_type=password"+
-                        "&username="+URLEncoder.encode(gitlabusr,"UTF-8")+
-                        "&login="+URLEncoder.encode(gitlabpwd,"UTF-8");
-                    URL url = new URL(gitlaburl+"/oauth/token?"+param);
-                    HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
-                    conn.setReadTimeout(10000);
-                    conn.setConnectTimeout(15000);
-                    conn.setRequestMethod("POST");
-                    conn.setDoInput(true);
-                    conn.setDoOutput(true);
-
-                    String response= "";
-                    Scanner inStream = new Scanner(conn.getInputStream());
-                    while(inStream.hasNextLine()) response+=(inStream.nextLine());
-
-                    System.out.println("DETOAUTHTOKEN "+response);
-                }  catch (Exception e) {
-                    e.printStackTrace();
-                }
-                */
             }
         });
         oauthtask.execute();
-   }
-
+    }
+    public void gitlabPull() {
+        GenericProgressTask task = new GenericProgressTask(new Runnable() {
+            public void run() {
+            try {
+                    gitlabapi = GitlabAPI.connect(gitlaburl, gitlabtok, TokenType.ACCESS_TOKEN);
+                    GitlabProject p = gitlabapi.getProject(gitlabusr,"TODO");
+                    if (p==null||!p.getName().equals("TODO")) msg("Cannot find repo TODO");
+                    else {
+                        byte[] tod = gitlabapi.getRawFileContent(p,"master","todo.txt");
+                        String str = new String(tod);
+                        if (str.length()==0||str.charAt(str.length()-1)!='\n') str+='\n';
+                        if (fromshare!=null) str+=fromshare+'\n';
+                        str+="<New Task>";
+                        vals=new ArrayList(Arrays.asList(str.split("\n")));
+                        setCurTasks();
+                        main.msg("Pull OK");
+                        showList();
+                    }
+                } catch (Exception e) {
+                    msg("Problem with gitlab pull");
+                    System.out.println("GITLAB KO ");
+                    e.printStackTrace();
+                }
+            }
+        });
+        task.execute();
+    }
+        
+ 
 }
