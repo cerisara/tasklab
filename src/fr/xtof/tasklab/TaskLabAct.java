@@ -451,7 +451,7 @@ public class TaskLabAct extends FragmentActivity {
     private class DetSyncHttpClient extends SyncHttpClient {
         protected RequestHandle sendRequest(DefaultHttpClient client, HttpContext httpContext, HttpUriRequest uriRequest, String contentType, ResponseHandlerInterface responseHandler, Context context) {
             System.out.println("WZA "+uriRequest.getClass().getName());
-            if (uriRequest.getClass().getName().equals("HttpGet")) {
+            if (uriRequest.getClass().getName().endsWith("HttpGet")) {
                 HttpGet gg = (HttpGet)uriRequest;
                 String s = gg.toString();
                 int i=s.lastIndexOf(' ');
