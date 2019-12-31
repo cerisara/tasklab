@@ -450,22 +450,25 @@ public class TaskLabAct extends FragmentActivity {
 
     private class DetSyncHttpClient extends SyncHttpClient {
         protected RequestHandle sendRequest(DefaultHttpClient client, HttpContext httpContext, HttpUriRequest uriRequest, String contentType, ResponseHandlerInterface responseHandler, Context context) {
-            HttpGet gg = (HttpGet)uriRequest;
-            String s = gg.toString().substring(4);
-            try {
-                String ss = s.replace("/TODO","%2FTODO");
-String goods = "http://192.168.1.65/api/v4/projects/cerisara%2FTODO/repository/files/todo.txt?access_token=2cb7828101006204c864f6453826ccc9f74f1357e00e6ae99355fe8a29538c64&ref=master&branch=master";
-                System.out.println("AZAZAZ SSSg "+goods);
-                System.out.println("AZAZAZ SSS0 "+s);
-                System.out.println("AZAZAZ SSS1 "+ss);
-                URI uri = new URI(ss);
-                gg.setURI(uri);
-            } catch (Exception e) {
-                System.out.println("AZAZAZ HORROR");
-                e.printStackTrace();
+            System.out.println("WZA "+uriRequest.getClass().getName());
+            if (uriRequest.getClass().getName().equals("HttpGet")) {
+                HttpGet gg = (HttpGet)uriRequest;
+                String s = gg.toString();
+                int i=s.lastIndexOf(' ');
+                s=s.substring(4,i);
+                try {
+                    String ss = s.replace("/TODO","%2FTODO");
+                    URI uri = new URI(ss);
+                    gg.setURI(uri);
+                } catch (Exception e) {
+                    System.out.println("AZAZAZ HORROR");
+                    e.printStackTrace();
+                }
+                System.out.println("AZAZAZ "+gg.toString());
+                return super.sendRequest(client,httpContext,gg,contentType, responseHandler, context);
+            } else {
+                return super.sendRequest(client,httpContext,uriRequest,contentType, responseHandler, context);
             }
-            System.out.println("AZAZAZ "+gg.toString());
-            return super.sendRequest(client,httpContext,gg,contentType, responseHandler, context);
         }
     }
 
@@ -546,15 +549,22 @@ String goods = "http://192.168.1.65/api/v4/projects/cerisara%2FTODO/repository/f
 			};
 
 			if (typ==1) {
-                client.put(gitlaburl+"/api/v4/projects/"+gitlabusr+"%2FTODO/repository/files/todo.txt?access_token="+gitlabtok+"&ref=master&branch=master&content="+url+"&commit_message=update%20file", rephdl);
+                try {
+                    String s = gitlaburl+"/api/v4/projects/"+
+                            URLEncoder.encode(gitlabusr+"/TODO","UTF-8")+
+                            "/repository/files/todo.txt?access_token="+gitlabtok+"&ref=master&branch=master&content="+url+"&commit_message=update%20file";
+                    System.out.println("CALLDETPUT "+s);
+                    client.put(s, rephdl);
+                } catch (Exception e) {
+                    System.out.println("CALLDETPUT error encoding ");
+                    e.printStackTrace();
+                }
 			} else {
                 try {
-                    gitlaburl = "http://192.168.1.65";
                     String s = gitlaburl+"/api/v4/projects/"+
                             URLEncoder.encode(gitlabusr+"/TODO","UTF-8")+
                             "/repository/files/todo.txt?access_token="+gitlabtok+"&ref=master&branch=master";
                     System.out.println("CALLDETGET "+s);
-        // sendRequest(httpClient, httpContext, addEntityToRequestBase(new HttpGet(URI.create(url).normalize()), entity), contentType, responseHandler, context);
                     client.get(s, rephdl);
                 } catch (Exception e) {
                     System.out.println("CALLDETGET error encoding ");
