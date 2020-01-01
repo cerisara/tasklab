@@ -1,0 +1,9 @@
+digraph D {
+    a [label="gitlab"]
+    b [label="zimbra calendar"]
+    c [label="TaskLab on android"]
+
+    a -> c
+    c -> a
+    b -> c
+}
