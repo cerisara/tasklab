@@ -11,6 +11,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
 
 public class Zimbra {
     public static void showCal() {
@@ -87,8 +90,17 @@ public class Zimbra {
         Thread zimbrath = new Thread(new Runnable() {
             public void run() {
                 try {
+                    Date c = Calendar.getInstance().getTime();
+                    Calendar call = Calendar.getInstance();
+                    call.setTime(c);
+                    call.add(Calendar.DATE, 15);
+                    Date cfin = call.getTime();
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+                    String formattedDate = df.format(c);
+                    String enDate = df.format(cfin);
                     // Relative dates should not very well managed from Zimbra ??
-                    final String url = "https://zimbra.inria.fr/home/cerisara/calendar?fmt=ics&auth=ba&start=-1day&end=+15days";
+                    final String url = "https://zimbra.inria.fr/home/cerisara/calendar?fmt=ics&auth=ba&start="+formattedDate+"&end="+enDate;
+                    System.out.println("ZIMBRADET calurl "+url);
                     URL uurl = new URL(url);
                     HttpURLConnection con = (HttpURLConnection) uurl.openConnection();
                     con.setRequestMethod("GET");
