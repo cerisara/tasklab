@@ -87,8 +87,8 @@ public class Zimbra {
         Thread zimbrath = new Thread(new Runnable() {
             public void run() {
                 try {
-                    // on prend 1 jours en arriere pour n'avoir que les futurs events
-                    final String url = "https://zimbra.inria.fr/home/cerisara/calendar?fmt=ics&auth=ba&start=1day";
+                    // Relative dates should not very well managed from Zimbra ??
+                    final String url = "https://zimbra.inria.fr/home/cerisara/calendar?fmt=ics&auth=ba&start=-1day&end=+15days";
                     URL uurl = new URL(url);
                     HttpURLConnection con = (HttpURLConnection) uurl.openConnection();
                     con.setRequestMethod("GET");
@@ -96,6 +96,7 @@ public class Zimbra {
                     con.setReadTimeout(5000);
                     con.setRequestProperty("Authorization", basicAuth);
                     int status = con.getResponseCode();
+                    System.out.println("ZIMBRADET status "+status);
                     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     String inputLine;
                     PrintWriter f = new PrintWriter(new OutputStreamWriter(new FileOutputStream("/mnt/sdcard/zimbra.ics")));
@@ -107,6 +108,7 @@ public class Zimbra {
                     f.close();
                     in.close();
                     con.disconnect();
+                    System.out.println("ZIMBRADET content "+content);
                     System.out.println("ZIMBRADET OK saved in /mnt/sdcard/zimbra.ics");
                 } catch (Exception e) {
                     System.out.println("ZIMBRADET KO saved");
