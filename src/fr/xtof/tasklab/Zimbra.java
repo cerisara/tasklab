@@ -29,22 +29,31 @@ public class Zimbra {
                 if (inputLine.startsWith("END:VEVENT") && inevt) {
                     inevt = false;
                     String s = "";
+                    String dinit="";
                     if (debday.length()>0) {
-                        s+=debyear+debmonth+debday; // only for sorting purpose
+                        dinit=debyear+debmonth+debday; // only for sorting purpose
+                        s+=dinit;
                         s+=debday+"/"+debmonth+"/"+debyear;
                         if (debhour.length()>0) {
                             s+="("+debhour.substring(0,2)+":"+debhour.substring(2,4)+")";
                         }
                     }
-                    if (finday.length()>0) {
-                        s+="-"+finday+"/"+finmonth+"/"+finyear;
-                        if (finhour.length()>0) {
-                            s+="("+finhour.substring(0,2)+":"+finhour.substring(2,4)+")";
+                    // only print future events
+                    Date c = Calendar.getInstance().getTime();
+                    SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+                    String formattedDate = df.format(c);
+                    String today = formattedDate.substring(0,4)+formattedDate.substring(5,7)+formattedDate.substring(8,10);
+                    if (Integer.parseInt(today)<=Integer.parseInt(dinit)) {
+                        if (finday.length()>0) {
+                            s+="-"+finday+"/"+finmonth+"/"+finyear;
+                            if (finhour.length()>0) {
+                                s+="("+finhour.substring(0,2)+":"+finhour.substring(2,4)+")";
+                            }
+                            s+=" ";
                         }
-                        s+=" ";
+                        s+=summ;
+                        eventstmp.add(s);
                     }
-                    s+=summ;
-                    eventstmp.add(s);
                     summ=""; debyear=""; debmonth=""; debday=""; debhour=""; finyear=""; finmonth=""; finday=""; finhour="";
                 }
                 if (inputLine.startsWith("SUMMARY:") && inevt) summ=inputLine.substring(8);
