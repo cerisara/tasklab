@@ -1,0 +1,3 @@
+- un serveur qui centralise RSS, meteo, agendas, emails, TODO list...
+- et qui expose une API REST simple en http
+- 
