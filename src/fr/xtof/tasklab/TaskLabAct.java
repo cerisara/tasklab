@@ -59,6 +59,7 @@ public class TaskLabAct extends FragmentActivity {
     private String fromshare = null;
 
     private RSS fr3items = new RSS();
+    private RSS zdnetitems = new RSS();
     private RSS curitems = fr3items;
 
     /** Called when the activity is first created. */
@@ -147,6 +148,8 @@ public class TaskLabAct extends FragmentActivity {
         vals.add(curitems.getTitle(i));
         vals.add(curitems.getSummary(i));
         setCurTasks();
+        setButtons(null,"back",null);
+        but2id=1;
         showList();
     }
 
@@ -265,6 +268,43 @@ public class TaskLabAct extends FragmentActivity {
         // theButton.setOnClickListener(new CustomListener(dialog));
     }
 
+    private void setButtons(final String b1, final String b2, final String b3) {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                {
+                    Button b = (Button)findViewById(R.id.but1);
+                    if (b1==null) {
+                        b.setEnabled(false);
+                        b.setText("");
+                    } else {
+                        b.setEnabled(true);
+                        b.setText(b1);
+                    }
+                }
+                {
+                    Button b = (Button)findViewById(R.id.but2);
+                    if (b2==null) {
+                        b.setEnabled(false);
+                        b.setText("");
+                    } else {
+                        b.setEnabled(true);
+                        b.setText(b2);
+                    }
+                }
+                {
+                    Button b = (Button)findViewById(R.id.but3);
+                    if (b3==null) {
+                        b.setEnabled(false);
+                        b.setText("");
+                    } else {
+                        b.setEnabled(true);
+                        b.setText(b3);
+                    }
+                }
+            }
+        });
+    }
     private void showList() {
         // clean up vals
         for (int i=vals.size()-1;i>=0;i--)
@@ -303,10 +343,27 @@ public class TaskLabAct extends FragmentActivity {
     }
     public void zdnet(View view) {
     }
+    private int but2id = 0;
     public void reset(View view) {
-        askCreds(null);
+        switch(but2id) {
+            case 0:
+                askCreds(null);
+                break;
+            case 1:
+                back2mainList();
+                break;
+        }
     }
    
+    private void back2mainList() {
+        setButtons("FR3","SETUP","ZDnet");
+        but2id=0;
+        vals.clear();
+        for (int i=0;i<curitems.getNitems();i++)
+            vals.add(curitems.getTitle(i));
+        showList();
+    }
+
     private void httpget(final String url) {
         Thread th = new Thread(new Runnable() {
             public void run() {
