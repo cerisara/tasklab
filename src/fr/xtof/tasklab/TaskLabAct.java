@@ -284,8 +284,7 @@ public class TaskLabAct extends FragmentActivity {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    DetProgressTask dett = new DetProgressTask(0,"http://xolki.duckdns.org/rssf3?auth="+gitlabpwd);
-                    dett.execute();
+                    httpget("http://xolki.duckdns.org/rssf3?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
@@ -294,7 +293,40 @@ public class TaskLabAct extends FragmentActivity {
     public void reset(View view) {
         askCreds(null);
     }
-    
+   
+    private void httpget(final String url) {
+        Thread th = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    System.out.println("detson init connection "+url);
+                    URL uurl = new URL(url);
+                    HttpURLConnection con = (HttpURLConnection) uurl.openConnection();
+                    con.setRequestMethod("GET");
+                    con.setConnectTimeout(5000);
+                    con.setReadTimeout(5000);
+                    // con.setRequestProperty("Authorization", basicAuth);
+                    int status = con.getResponseCode();
+                    System.out.println("detson connection status "+status);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    String inputLine;
+                    String content = "";
+                    while ((inputLine = in.readLine()) != null) {
+                        content += inputLine+"\n";
+                    }
+                    in.close();
+                    con.disconnect();
+                    String str = content;
+                    parseRSSList(str);
+                    System.out.println("detson content "+content);
+                } catch (Exception e) {
+                    System.out.println("detson connect KO saved");
+                    e.printStackTrace();
+                }
+            }
+        });
+        th.start();
+    }
+
     private class DetSyncHttpClient extends SyncHttpClient {
         protected RequestHandle sendRequest(DefaultHttpClient client, HttpContext httpContext, HttpUriRequest uriRequest, String contentType, ResponseHandlerInterface responseHandler, Context context) {
             System.out.println("WZA "+uriRequest.getClass().getName());
@@ -331,6 +363,7 @@ public class TaskLabAct extends FragmentActivity {
         }
 
         private void connect(final int typ, String url) {
+            System.out.println("connect "+url);
             SyncHttpClient client = new DetSyncHttpClient();
             AsyncHttpResponseHandler rephdl = new AsyncHttpResponseHandler() {
                 @Override
