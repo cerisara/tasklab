@@ -18,8 +18,8 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GET"
-        android:onClick="geturl"
+        android:text="FR3"
+        android:onClick="fr3"
 	/>
     <View
         android:layout_width="0dp"
@@ -37,25 +37,12 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         />    
-    <ToggleButton
-        android:id="@+id/zimbrabut"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textOff="ZIMBRA"
-        android:textOn="TASKS"
-        android:onClick="zimbra"
-        />
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        />    
     <Button
         android:id="@+id/putbut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="PUT"
-        android:onClick="putfile"
+        android:text="ZDnet"
+        android:onClick="zdnet"
         />
 </LinearLayout>
 
