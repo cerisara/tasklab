@@ -58,6 +58,9 @@ public class TaskLabAct extends FragmentActivity {
     public static TaskLabAct main;
     private String fromshare = null;
 
+    private RSS fr3items = new RSS();
+    private RSS curitems = fr3items;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -137,6 +140,14 @@ public class TaskLabAct extends FragmentActivity {
         fromshare = null;
         System.out.println("ONNEWINTENT "+in.toString());
         if (in.getAction().equals(Intent.ACTION_SEND)) getNewStringFromShareMenu(in);
+    }
+
+    private void showDetails(final int i) {
+        vals.clear();
+        vals.add(curitems.getTitle(i));
+        vals.add(curitems.getSummary(i));
+        setCurTasks();
+        showList();
     }
 
     private void editTask(final int taskid) {
@@ -270,7 +281,9 @@ public class TaskLabAct extends FragmentActivity {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         int itemPosition     = position;
                         // String  itemValue    = (String) listView.getItemAtPosition(position);
-                        editTask(itemPosition);
+                        // si on veut editer en cliquant dessus:
+                        // editTask(itemPosition);
+                        showDetails(itemPosition);
                     }
                 });
             }
@@ -317,7 +330,7 @@ public class TaskLabAct extends FragmentActivity {
                     con.disconnect();
                     String str = content;
                     parseRSSList(str);
-                    System.out.println("detson content "+content);
+                    // System.out.println("detson content "+content);
                 } catch (Exception e) {
                     System.out.println("detson connect KO saved");
                     e.printStackTrace();
@@ -440,11 +453,10 @@ public class TaskLabAct extends FragmentActivity {
     }
 
     private void parseRSSList(String s) {
-        String[] ss = s.split("\n");
-        vals = new ArrayList();
-        for (int i=0;i+3<ss.length;i+=4) {
-            vals.add(ss[i]);
-        }
+        curitems.parse(s);
+        vals.clear();
+        for (int i=0;i<curitems.getNitems();i++)
+            vals.add(curitems.getTitle(i));
         setCurTasks();
         main.msg("Pull OK");
         showList();
