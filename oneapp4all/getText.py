@@ -58,5 +58,5 @@ def zdnet():
 
     print(text)
 
-zdnet()
+# zdnet()
 
