@@ -17,23 +17,25 @@ def post_companies():
 	return json.dumps({"success": True, "lg":language}), 201
 """
 
-@api.route('/rssf3', methods=['GET'])
-def rss_france3():
+def getauth():
     code = request.args.get('auth')
     isauth = auth.checkauth(code)
-    if isauth:
-        return rss.rssF3()
-    else:
+    if not isauth:
         return "<p>bad auth</p>"
+    else:
+        return ""
+
+@api.route('/rssf3', methods=['GET'])
+def rss_france3():
+    r=getauth()
+    if r!="": return r
+    return rss.rssF3()
 
 @api.route('/rsszdnet', methods=['GET'])
 def rss_zdnet():
-    code = request.args.get('auth')
-    isauth = auth.checkauth(code)
-    if isauth:
-        return rss.rssZDnet()
-    else:
-        return "<p>bad auth</p>"
+    r=getauth()
+    if r!="": return r
+    return rss.rssZDnet()
 
 if __name__ == '__main__':
     # this is the port of xolki.duckdns.org on talc2
