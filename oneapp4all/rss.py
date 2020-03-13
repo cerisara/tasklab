@@ -10,6 +10,15 @@ def getFeed(url):
 def showFeed(feed):
     res=""
     for t,s,l in feed:
+        t = t.replace('\n','')
+        s = s.replace('\n','')
+        l = l.replace('\n','')
+        t = t.replace('<p>','')
+        s = s.replace('<p>','')
+        l = l.replace('<p>','')
+        t = t.replace('</p>','')
+        s = s.replace('</p>','')
+        l = l.replace('</p>','')
         res=res+t+"\n"+s+"\n"+l+"\n\n"
     return res 
 
