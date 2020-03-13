@@ -32,3 +32,8 @@ def rssZDnet():
     feed = getFeed(url)
     return showFeed(feed)
 
+def rssHN():
+    url = "https://hnrss.org/newest"
+    feed = getFeed(url)
+    return showFeed(feed)
+

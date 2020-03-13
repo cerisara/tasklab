@@ -37,6 +37,13 @@ def rss_zdnet():
     if r!="": return r
     return rss.rssZDnet()
 
+@api.route('/rsshn', methods=['GET'])
+def rss_hn():
+    r=getauth()
+    if r!="": return r
+    return rss.rssHN()
+
+
 if __name__ == '__main__':
     # this is the port of xolki.duckdns.org on talc2
     api.run(host="0.0.0.0", port=7937)
