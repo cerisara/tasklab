@@ -2,6 +2,7 @@ from flask import Flask, json, request
 import auth
 import rss
 import todolist
+import zimbra
 
 api = Flask(__name__)
 
@@ -56,6 +57,12 @@ def push_todo_list():
     if r!="": return r
     parms = request.values.get('txt')
     return todolist.pushtodo(parms)
+
+@api.route('/zimbracal', methods=['GET'])
+def zimbra_cal():
+    r=getauth()
+    if r!="": return r
+    return zimbra.getZimbraCal()
 
 if __name__ == '__main__':
     # this is the port of xolki.duckdns.org on talc2

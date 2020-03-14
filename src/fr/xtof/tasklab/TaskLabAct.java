@@ -207,6 +207,21 @@ public class TaskLabAct extends FragmentActivity {
         dialog.show(getSupportFragmentManager(),"edit task");
     }
 
+    private void menuZimbra() {
+        setButtons("Menu","SETUP","FR3");
+        but2id=0;
+        list2action = 3;
+         new AlertDialog.Builder(this)
+            .setTitle("Download Zimbra cal ")
+            .setMessage("Download Zimbra cal ?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    httpget("http://xolki.duckdns.org/zimbracal?auth="+gitlabpwd);
+                }})
+        .setNegativeButton(android.R.string.no, null).show();
+    }
+ 
     private void menuTODOlist() {
         setButtons("Menu","SETUP","FR3");
         but2id=0;
@@ -247,6 +262,8 @@ public class TaskLabAct extends FragmentActivity {
             case 3:
                 menuTODOlist();
                 break;
+            case 4:
+                menuZimbra();
         }
     }
     public void menu(View v) {
@@ -258,8 +275,8 @@ public class TaskLabAct extends FragmentActivity {
         vals.add("RSS ZDNet");
         vals.add("RSS HackerNews");
         vals.add("TODO list");
-        vals.add("Meteo");
         vals.add("Calendar PRO");
+        vals.add("Meteo");
         vals.add("Calendar PERSO");
         vals.add("Emails");
         showList();
@@ -501,6 +518,9 @@ public class TaskLabAct extends FragmentActivity {
                         case 2:
                             parseTODOList(str);
                             break;
+                        case 3:
+                            parseZimbraCal(str);
+                            break;
                     }
                     // System.out.println("detson content "+content);
                 } catch (Exception e) {
@@ -624,6 +644,25 @@ public class TaskLabAct extends FragmentActivity {
         }
     }
 
+    private void parseZimbraCal(String s) {
+        String[] st = s.split("\n");
+        vals.clear();
+        for (int i=0;i<st.length;i++) {
+            int j=st[i].indexOf(' ');
+            if (j>=0) {
+                int k=st[i].indexOf(' ',j+1);
+                if (k>=0) {
+                    String deb = st[i].substring(0,j);
+                    String dat = deb.substring(0,8);
+                    String tit = st[i].substring(k+1);
+                    vals.add(dat+" "+tit);
+                }
+            }
+        }
+        setCurTasks();
+        main.msg("got ZimbraCal OK");
+        showList();
+    }
     private void parseTODOList(String s) {
         String[] st = s.split("\n");
         vals.clear();
