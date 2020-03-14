@@ -59,12 +59,15 @@ public class TaskLabAct extends FragmentActivity {
     public static TaskLabAct main;
     private String fromshare = null;
 
-    private RSS fr3items = new RSS();
-    private RSS zdnetitems = new RSS();
+    private RSS fr3items = new RSS(0);
+    private RSS zdnetitems = new RSS(1);
+    private RSS hnitems = new RSS(2);
     private RSS curitems = fr3items;
 
     // action to perform when clicking on an item in the list
     private int list2action = 0;
+    // dernier item d'un flux RSS duquel on a vu le detail
+    private int focusRSSitem = 0;
 
     // position of the list in RSS items just before showing the details of one item
     private int lastListPos = 0, top=0;
@@ -151,7 +154,33 @@ public class TaskLabAct extends FragmentActivity {
         if (in.getAction().equals(Intent.ACTION_SEND)) getNewStringFromShareMenu(in);
     }
 
+    private void downloadRSSLink() {
+        list2action=4;
+        new AlertDialog.Builder(this)
+            .setTitle("Download RSS page ?")
+            .setMessage("Download RSS page ?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    String src="f3";
+                    switch(curitems.source) {
+                        case 0:
+                            src="f3";
+                            break;
+                        case 1:
+                            src="zdnet";
+                            break;
+                        case 2:
+                            src="hn";
+                            break;
+                    }
+                    httpget("http://xolki.duckdns.org/rss"+src+"link?auth="+gitlabpwd+"&link="+curitems.getLinks(focusRSSitem));
+                }})
+        .setNegativeButton(android.R.string.no, null).show();
+    }
     private void showDetails(final int i) {
+        list2action=3;
+        focusRSSitem = i;
         lastListPos = listView.getFirstVisiblePosition();
         View v = listView.getChildAt(0);
         top = (v == null) ? 0 : (v.getTop() - listView.getPaddingTop());
@@ -211,7 +240,7 @@ public class TaskLabAct extends FragmentActivity {
         setButtons("Menu","SETUP","FR3");
         but2id=0;
         list2action = 3;
-         new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
             .setTitle("Download Zimbra cal ")
             .setMessage("Download Zimbra cal ?")
             .setIcon(android.R.drawable.ic_dialog_alert)
@@ -251,12 +280,15 @@ public class TaskLabAct extends FragmentActivity {
     private void choixmenu(int i) {
         switch(i) {
             case 0:
+                curitems = fr3items;
                 menuRSS("rssf3");
                 break;
             case 1:
+                curitems = zdnetitems;
                 menuRSS("rsszdnet");
                 break;
             case 2:
+                curitems = hnitems;
                 menuRSS("rsshn");
                 break;
             case 3:
@@ -425,6 +457,11 @@ public class TaskLabAct extends FragmentActivity {
                                 but2id=2;
                                 editTask(itemPosition);
                                 break;
+                            case 3: // on est dans detail d'un RSS: on veut download le link
+                                downloadRSSLink();
+                                break;
+                            default:
+                                break;
                         }
                     }
                 });
@@ -435,6 +472,7 @@ public class TaskLabAct extends FragmentActivity {
     // shortcut button accessible on the first page
     public void fr3(View view) {
         menuRSS("rssf3");
+        curitems = fr3items;
     }
     private int but2id = 0;
     public void reset(View view) {
@@ -454,6 +492,7 @@ public class TaskLabAct extends FragmentActivity {
     private void pageRSSList() {
         setButtons("Menu","SETUP","FR3");
         but2id=0;
+        list2action = 1;
         vals.clear();
         for (int i=0;i<curitems.getNitems();i++)
             vals.add(curitems.getTitle(i));
@@ -520,6 +559,9 @@ public class TaskLabAct extends FragmentActivity {
                             break;
                         case 3:
                             parseZimbraCal(str);
+                            break;
+                        case 4:
+                            parseRSSpage(str);
                             break;
                     }
                     // System.out.println("detson content "+content);
@@ -644,6 +686,12 @@ public class TaskLabAct extends FragmentActivity {
         }
     }
 
+    private void parseRSSpage(String s) {
+        vals.clear();
+        vals.add(s);
+        main.msg("got RSSpage OK");
+        showList();
+    }
     private void parseZimbraCal(String s) {
         String[] st = s.split("\n");
         vals.clear();

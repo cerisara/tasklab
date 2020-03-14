@@ -33,11 +33,25 @@ def rss_france3():
     if r!="": return r
     return rss.rssF3()
 
+@api.route('/rssf3link', methods=['GET'])
+def rss_france3link():
+    r=getauth()
+    if r!="": return r
+    link = request.values.get('link')
+    return rss.france3link(link)
+
 @api.route('/rsszdnet', methods=['GET'])
 def rss_zdnet():
     r=getauth()
     if r!="": return r
     return rss.rssZDnet()
+
+@api.route('/rsszdnetlink', methods=['GET'])
+def rss_zdnetlink():
+    r=getauth()
+    if r!="": return r
+    link = request.values.get('link')
+    return rss.zdnetlink(link)
 
 @api.route('/rsshn', methods=['GET'])
 def rss_hn():

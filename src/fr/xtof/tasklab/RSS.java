@@ -6,6 +6,14 @@ public class RSS {
     ArrayList titles = new ArrayList();
     ArrayList summary = new ArrayList();
     ArrayList links = new ArrayList();
+    public int source = 0;
+    // 0: France 3
+    // 1: ZDNet
+    // 2: HackerNews
+
+    public RSS(int src) {
+        source=src;
+    }
 
     public void parse(String s) {
         // TODO: do better than erase all old stuff
