@@ -208,7 +208,15 @@ public class TaskLabAct extends FragmentActivity {
 
     private void menuTODOlist() {
         list2action = 2;
-        // TODO
+         new AlertDialog.Builder(this)
+            .setTitle("Download TODO ")
+            .setMessage("Download TODO ?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    httpget("http://xolki.duckdns.org/todo?auth="+gitlabpwd);
+                }})
+        .setNegativeButton(android.R.string.no, null).show();
     }
     private void menuRSS(final String endpoint) {
         list2action = 1;
@@ -441,7 +449,14 @@ public class TaskLabAct extends FragmentActivity {
                     in.close();
                     con.disconnect();
                     String str = content;
-                    parseRSSList(str);
+                    switch(list2action) {
+                        case 1:
+                            parseRSSList(str);
+                            break;
+                        case 2:
+                            parseTODOList(str);
+                            break;
+                    }
                     // System.out.println("detson content "+content);
                 } catch (Exception e) {
                     System.out.println("detson connect KO saved");
@@ -564,6 +579,15 @@ public class TaskLabAct extends FragmentActivity {
         }
     }
 
+    private void parseTODOList(String s) {
+        String[] st = s.split("\n");
+        vals.clear();
+        for (int i=0;i<st.length;i++)
+            vals.add(st[i]);
+        setCurTasks();
+        main.msg("got TODO OK");
+        showList();
+    }
     private void parseRSSList(String s) {
         curitems.parse(s);
         vals.clear();

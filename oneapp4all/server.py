@@ -1,6 +1,7 @@
 from flask import Flask, json, request
 import auth
 import rss
+import todolist
 
 api = Flask(__name__)
 
@@ -43,6 +44,11 @@ def rss_hn():
     if r!="": return r
     return rss.rssHN()
 
+@api.route('/todo', methods=['GET'])
+def todo_list():
+    r=getauth()
+    if r!="": return r
+    return todolist.todo()
 
 if __name__ == '__main__':
     # this is the port of xolki.duckdns.org on talc2
