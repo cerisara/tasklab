@@ -19,8 +19,8 @@
         android:id="@+id/but1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FR3"
-        android:onClick="fr3"
+        android:text="Menu"
+        android:onClick="menu"
 	/>
     <View
         android:layout_width="0dp"
@@ -43,8 +43,8 @@
         android:id="@+id/but3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ZDnet"
-        android:onClick="zdnet"
+        android:text="FR3"
+        android:onClick="fr3"
         />
 </LinearLayout>
 
