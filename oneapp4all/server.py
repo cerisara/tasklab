@@ -65,12 +65,25 @@ def todo_list():
     if r!="": return r
     return todolist.todo()
 
+@api.route('/todocal', methods=['GET'])
+def todo_cal():
+    r=getauth()
+    if r!="": return r
+    return todolist.todocal()
+
 @api.route('/pushtodo', methods=['POST'])
 def push_todo_list():
     r=getauth()
     if r!="": return r
     parms = request.values.get('txt')
     return todolist.pushtodo(parms)
+
+@api.route('/pushtodocal', methods=['POST'])
+def push_todo_cal():
+    r=getauth()
+    if r!="": return r
+    parms = request.values.get('txt')
+    return todolist.pushtodocal(parms)
 
 @api.route('/zimbracal', methods=['GET'])
 def zimbra_cal():

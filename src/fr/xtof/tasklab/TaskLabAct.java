@@ -236,6 +236,20 @@ public class TaskLabAct extends FragmentActivity {
         dialog.show(getSupportFragmentManager(),"edit task");
     }
 
+    private void menuCalPerso() {
+        setButtons("Menu","SETUP","FR3");
+        but2id=0;
+        list2action = 5;
+        new AlertDialog.Builder(this)
+            .setTitle("Download CalPerso cal ")
+            .setMessage("Download CalPerso cal ?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    httpget("http://xolki.duckdns.org/todocal?auth="+gitlabpwd);
+                }})
+        .setNegativeButton(android.R.string.no, null).show();
+    } 
     private void menuZimbra() {
         setButtons("Menu","SETUP","FR3");
         but2id=0;
@@ -296,6 +310,10 @@ public class TaskLabAct extends FragmentActivity {
                 break;
             case 4:
                 menuZimbra();
+                break;
+            case 5:
+                menuCalPerso();
+                break;
         }
     }
     public void menu(View v) {
@@ -308,22 +326,27 @@ public class TaskLabAct extends FragmentActivity {
         vals.add("RSS HackerNews");
         vals.add("TODO list");
         vals.add("Calendar PRO");
-        vals.add("Meteo");
         vals.add("Calendar PERSO");
+        vals.add("Meteo");
         vals.add("Emails");
         showList();
     }
 
     private void pushTODOList() {
+        String topush = "TODO list";
+        if (list2action==5) topush = "Cal Perso";
         new AlertDialog.Builder(this)
-            .setTitle("Pusth TODO list")
-            .setMessage("Push TODO list ?")
+            .setTitle("Pusth "+topush)
+            .setMessage("Push "+topush+" ?")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     String parms = "txt=";
                     for (String p: vals) parms+=p+"£";
-                    httppost("http://xolki.duckdns.org/pushtodo?auth="+gitlabpwd,parms);
+                    if (list2action==2)
+                        httppost("http://xolki.duckdns.org/pushtodo?auth="+gitlabpwd,parms);
+                    else if (list2action==5)
+                        httppost("http://xolki.duckdns.org/pushtodocal?auth="+gitlabpwd,parms);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
@@ -453,6 +476,7 @@ public class TaskLabAct extends FragmentActivity {
                                 showDetails(itemPosition);
                                 break;
                             case 2: // on edit une tache dans la TODO list
+                            case 5:
                                 setButtons("Menu","push",null);
                                 but2id=2;
                                 editTask(itemPosition);
@@ -554,7 +578,8 @@ public class TaskLabAct extends FragmentActivity {
                         case 1:
                             parseRSSList(str);
                             break;
-                        case 2:
+                        case 2: // TODO list
+                        case 5: // cal perso
                             parseTODOList(str);
                             break;
                         case 3:
