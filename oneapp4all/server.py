@@ -50,6 +50,13 @@ def todo_list():
     if r!="": return r
     return todolist.todo()
 
+@api.route('/pushtodo', methods=['POST'])
+def push_todo_list():
+    r=getauth()
+    if r!="": return r
+    parms = request.values.get('txt')
+    return todolist.pushtodo(parms)
+
 if __name__ == '__main__':
     # this is the port of xolki.duckdns.org on talc2
     api.run(host="0.0.0.0", port=7937)

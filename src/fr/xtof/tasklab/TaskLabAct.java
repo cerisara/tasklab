@@ -1,5 +1,6 @@
 package fr.xtof.tasklab;
 
+import java.io.DataOutputStream;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.app.Dialog;
@@ -207,6 +208,8 @@ public class TaskLabAct extends FragmentActivity {
     }
 
     private void menuTODOlist() {
+        setButtons("Menu","SETUP","FR3");
+        but2id=0;
         list2action = 2;
          new AlertDialog.Builder(this)
             .setTitle("Download TODO ")
@@ -262,6 +265,20 @@ public class TaskLabAct extends FragmentActivity {
         showList();
     }
 
+    private void pushTODOList() {
+        new AlertDialog.Builder(this)
+            .setTitle("Pusth TODO list")
+            .setMessage("Push TODO list ?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    String parms = "txt=";
+                    for (String p: vals) parms+=p+"£";
+                    httppost("http://xolki.duckdns.org/pushtodo?auth="+gitlabpwd,parms);
+                }})
+        .setNegativeButton(android.R.string.no, null).show();
+    }
+ 
     public void askCreds(View view) {
         class CustomListener implements View.OnClickListener {
             private final Dialog dialog;
@@ -387,6 +404,8 @@ public class TaskLabAct extends FragmentActivity {
                                 showDetails(itemPosition);
                                 break;
                             case 2: // on edit une tache dans la TODO list
+                                setButtons("Menu","push",null);
+                                but2id=2;
                                 editTask(itemPosition);
                                 break;
                         }
@@ -409,6 +428,9 @@ public class TaskLabAct extends FragmentActivity {
             case 1:
                 pageRSSList();
                 break;
+            case 2:
+                pushTODOList();
+                break;
         }
     }
    
@@ -427,6 +449,29 @@ public class TaskLabAct extends FragmentActivity {
         });
     }
 
+    private void httppost(final String url, final String parms) {
+        try {
+            byte[] postData       = parms.getBytes("UTF-8");
+            int    postDataLength = postData.length;
+            URL    uurl            = new URL( url );
+            HttpURLConnection conn= (HttpURLConnection) uurl.openConnection();
+            conn.setDoOutput( true );
+            conn.setInstanceFollowRedirects( false );
+            conn.setRequestMethod( "POST" );
+            conn.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestProperty( "charset", "utf-8");
+            conn.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+            conn.setUseCaches( false );
+            try( DataOutputStream wr = new DataOutputStream( conn.getOutputStream())) {
+                wr.write( postData );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            conn.getResponseCode();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private void httpget(final String url) {
         Thread th = new Thread(new Runnable() {
             public void run() {
@@ -584,6 +629,7 @@ public class TaskLabAct extends FragmentActivity {
         vals.clear();
         for (int i=0;i<st.length;i++)
             vals.add(st[i]);
+        vals.add("<New item>");
         setCurTasks();
         main.msg("got TODO OK");
         showList();
