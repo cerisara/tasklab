@@ -510,10 +510,10 @@ public class TaskLabAct extends FragmentActivity {
         });
     }
 
-    // shortcut button accessible on the first page
-    public void fr3(View view) {
-        menuRSS("rssf3");
-        curitems = fr3items;
+    // shortcut buttons accessible on the first page
+    public void save(View view) {
+        // TODO: quickly add an event, when on the first page
+        // on the RSS page, this saves the RSS link to an archive file of interesting links
     }
     private int but2id = 0;
     public void reset(View view) {

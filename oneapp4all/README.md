@@ -4,6 +4,7 @@
 TODO:
 
 - bouton rapide: ajouter cal event
+- save cur RSS to list
 - save TODO list and calendars for offline
 - emails
 - lynx search ?

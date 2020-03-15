@@ -43,8 +43,8 @@
         android:id="@+id/but3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="FR3"
-        android:onClick="fr3"
+        android:text="Save"
+        android:onClick="save"
         />
 </LinearLayout>
 
