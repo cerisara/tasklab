@@ -87,3 +87,5 @@ def rssHN():
     feed = getFeed(url)
     return showFeed(feed)
 
+print(rssF3())
+
