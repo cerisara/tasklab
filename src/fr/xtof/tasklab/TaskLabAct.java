@@ -236,6 +236,20 @@ public class TaskLabAct extends FragmentActivity {
         dialog.show(getSupportFragmentManager(),"edit task");
     }
 
+    private void menuMeteo() {
+        setButtons("Menu","SETUP","FR3");
+        but2id=0;
+        list2action = 6;
+        new AlertDialog.Builder(this)
+            .setTitle("Download Meteo")
+            .setMessage("Download Meteo ?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    httpget("http://xolki.duckdns.org/meteo?auth="+gitlabpwd);
+                }})
+        .setNegativeButton(android.R.string.no, null).show();
+    }
     private void menuCalPerso() {
         setButtons("Menu","SETUP","FR3");
         but2id=0;
@@ -313,6 +327,9 @@ public class TaskLabAct extends FragmentActivity {
                 break;
             case 5:
                 menuCalPerso();
+                break;
+            case 6:
+                menuMeteo();
                 break;
         }
     }
@@ -586,7 +603,8 @@ public class TaskLabAct extends FragmentActivity {
                             parseZimbraCal(str);
                             break;
                         case 4:
-                            parseRSSpage(str);
+                        case 6:
+                            parsePage(str);
                             break;
                     }
                     // System.out.println("detson content "+content);
@@ -711,10 +729,10 @@ public class TaskLabAct extends FragmentActivity {
         }
     }
 
-    private void parseRSSpage(String s) {
+    private void parsePage(String s) {
         vals.clear();
         vals.add(s);
-        main.msg("got RSSpage OK");
+        main.msg("got page OK");
         showList();
     }
     private void parseZimbraCal(String s) {

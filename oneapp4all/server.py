@@ -1,23 +1,11 @@
 from flask import Flask, json, request
 import auth
 import rss
+import meteo
 import todolist
 import zimbra
 
 api = Flask(__name__)
-
-"""
-companies = [{"id": 1, "name": "Company One"}, {"id": 2, "name": "Company Two"}]
-
-@api.route('/c', methods=['GET'])
-def get_companies():
-  return json.dumps(companies)
-
-@api.route('/c', methods=['POST'])
-def post_companies():
-	language = request.args.get('l')
-	return json.dumps({"success": True, "lg":language}), 201
-"""
 
 def getauth():
     code = request.args.get('auth')
@@ -26,6 +14,12 @@ def getauth():
         return "<p>bad auth</p>"
     else:
         return ""
+
+@api.route('/meteo', methods=['GET'])
+def rss_meteo():
+    r=getauth()
+    if r!="": return r
+    return meteo.meteo()
 
 @api.route('/rssf3', methods=['GET'])
 def rss_france3():
