@@ -3,8 +3,8 @@
 
 TODO:
 
-- hn load page
 - bouton rapide: ajouter cal event
+- save TODO list and calendars for offline
 - emails
 - lynx search ?
 - arxiv - read papers
