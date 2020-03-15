@@ -2,13 +2,7 @@ import feedparser
 import urllib.request
 from bs4 import BeautifulSoup
 
-def france3link(link):
-    with urllib.request.urlopen(link) as f: html = f.read()
-    html = html.decode('utf8')
-    i = html.find('text-chapo--text')
-    html = html[i:]
-    i = html.find('>')
-    html = html[i+1:]
+def cleanhtml(html):
     soup = BeautifulSoup(html)
 
     # kill all script and style elements
@@ -25,6 +19,26 @@ def france3link(link):
     # drop blank lines
     text = '\n'.join(chunk for chunk in chunks if chunk)
     return text
+
+def france3link(link):
+    with urllib.request.urlopen(link) as f: html = f.read()
+    html = html.decode('utf8')
+    i = html.find('text-chapo--text')
+    html = html[i:]
+    i = html.find('>')
+    html = html[i+1:]
+    return cleanhtml(html)
+
+def hnlink(link):
+    with urllib.request.urlopen(link) as f: html = f.read()
+    html = html.decode('utf8')
+    ls = html.split("\n")
+    for i in range(len(ls)-1):
+        if ls[i].find("score")>=0:
+            hh = ls[i+1]
+            return cleanhtml(hh)
+    # ce n'est pas un lien hackernews, mais un lien general
+    return cleanhtml(html)
 
 def zdnetlink(link):
     with urllib.request.urlopen(link) as f: html = f.read()
@@ -33,22 +47,7 @@ def zdnetlink(link):
     html = html[i:]
     i = html.find("div")
     html = html[i+4:]
-    soup = BeautifulSoup(html)
-
-    # kill all script and style elements
-    for script in soup(["script", "style"]):
-        script.extract()    # rip it out
-
-    # get text
-    text = soup.get_text()
-
-    # break into lines and remove leading and trailing space on each
-    lines = (line.strip() for line in text.splitlines())
-    # break multi-headlines into a line each
-    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-    # drop blank lines
-    text = '\n'.join(chunk for chunk in chunks if chunk)
-    return text
+    return cleanhtml(html)
 
 def getFeed(url):
     feed = feedparser.parse(url)
@@ -86,6 +85,4 @@ def rssHN():
     url = "https://hnrss.org/newest"
     feed = getFeed(url)
     return showFeed(feed)
-
-print(rssF3())
 

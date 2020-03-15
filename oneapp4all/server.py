@@ -53,6 +53,13 @@ def rss_hn():
     if r!="": return r
     return rss.rssHN()
 
+@api.route('/rsshnlink', methods=['GET'])
+def rss_hnlink():
+    r=getauth()
+    if r!="": return r
+    link = request.values.get('link')
+    return rss.hnlink(link)
+
 @api.route('/todo', methods=['GET'])
 def todo_list():
     r=getauth()

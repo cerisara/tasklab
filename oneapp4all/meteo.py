@@ -22,8 +22,8 @@ def meteo():
             dates=l[i+1:].split(',')
         elif l.startswith("pluie,"):
             pl=l[6:].split(',')
-        elif l.startswith("nebulosite:totale,"):
-            neb=l[18:].split(',')
+        elif l.startswith("nebulosite:basse,"):
+            neb=l[17:].split(',')
     s=""
     for i in range(len(dates)):
         d = parser.parse(dates[i])
