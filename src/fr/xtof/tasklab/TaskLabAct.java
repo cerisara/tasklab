@@ -485,16 +485,16 @@ public class TaskLabAct extends FragmentActivity {
             case 2: // TODO list visible
             case 5: // calendrier perso visible
                 // on edit une tache 
-                setButtons("Menu","push",null);
+                setButtons("Menu","push","Save");
                 break;
-            case 1: // liste de RSS items: on veut le detail d'un item
             case 3: // on est dans detail d'un RSS: on veut download le link
-                setButtons(null,"back",null);
+            case 7: // page web = détails d'un RSS
+                setButtons("Menu","back","Save");
                 break;
             case 0: // menu principal: choix RSS, emails...
+            case 1: // liste de RSS items: on veut le detail d'un item
             case 4: // calendrier Zimbra
             case 6: // meteo
-            case 7: // page web = détails d'un RSS
             default:
                 setButtons("Menu","SETUP","Save");
                 break;
@@ -535,7 +535,7 @@ public class TaskLabAct extends FragmentActivity {
                                 break;
                             case 6: // meteo
                                 break;
-                            case 7: // page web = détails d'un RSS
+                            case 7: // page web = link d'un RSS
                                 break;
                             default:
                                 break;
@@ -559,9 +559,20 @@ public class TaskLabAct extends FragmentActivity {
             vals.set(lastitem,formattedDate+" ");
             showList();
             editTask(lastitem);
+        } else {
+            // TODO on the RSS page, this saves the RSS link to an archive file of interesting links
+            // for now it saves it in the perso cal
+            list2action = 5;
+            getCurTasks();
+            int lastitem = vals.size()-1;
+            Date c = Calendar.getInstance().getTime();
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+            String formattedDate = df.format(c);
+            String link = curitems.getLinks(focusRSSitem);
+            vals.set(lastitem,formattedDate+" "+link);
+            setCurTasks();
+            showList();
         }
- 
-        // on the RSS page, this saves the RSS link to an archive file of interesting links
     }
     // 2eme bouton
     public void reset(View view) {
@@ -577,14 +588,14 @@ public class TaskLabAct extends FragmentActivity {
         */
         switch(list2action) {
             case 0:
-            case 3:
+            case 1:
             case 4:
             case 6:
-            case 7:
                 // propose de rentrer a nouveau le code d'acces
                 askCreds(null);
                 break;
-            case 1:
+            case 3:
+            case 7:
                 // back: revient a la liste des items RSS depuis le detail de l'un d'entre eux
                 pageRSSList();
                 break;
