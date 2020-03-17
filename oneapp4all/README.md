@@ -3,9 +3,11 @@
 
 TODO:
 
-- bouton rapide: ajouter cal event
+X bouton rapide: ajouter cal event
+X share menu
+X save calendar perso for offline
+- transférer un elt du cal perso vers TODO list et vice-versa
 - save cur RSS to list
-- save TODO list and calendars for offline
 - emails
 - lynx search ?
 - arxiv - read papers
