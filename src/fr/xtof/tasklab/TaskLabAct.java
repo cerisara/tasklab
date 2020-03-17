@@ -65,6 +65,16 @@ public class TaskLabAct extends FragmentActivity {
     private RSS curitems = fr3items;
 
     // action to perform when clicking on an item in the list
+    /*
+        0 : le main menu est visible
+        1 : une liste de RSS items est visible
+        2 : la TODO list est visible
+        3 : les details d'un RSS item sont visibles
+        4 : le calendrier Zimbra est visible
+        5 : le calendrier perso est visible
+        6 : la meteo est visible
+        7 : une page web (venant d'un RSS) est visible
+    */
     private int list2action = 0;
     // dernier item d'un flux RSS duquel on a vu le detail
     private int focusRSSitem = 0;
@@ -87,8 +97,10 @@ public class TaskLabAct extends FragmentActivity {
             gitlabpwd=k;
         }
 
-        // show the last list displayed:
+        // par defaut, montre le calendrier perso:
+        list2action = 5;
         getCurTasks();
+        showList();
 
         Intent in = this.getIntent();
         fromshare = null;
@@ -96,7 +108,7 @@ public class TaskLabAct extends FragmentActivity {
     }
 
     /* Store all current tasks in store.
-     * When pressing "GET" erases all current tasks with the ones from the server (TODO: ask for confirm)
+     * When pressing "GET" erases all current tasks with the ones from the server
      * When pressing "PUT" uploads current tasks onto the server
      */
     private void getCurTasks() {
@@ -140,7 +152,6 @@ public class TaskLabAct extends FragmentActivity {
             fromshare = ""+s;
             vals.set(vals.size()-1,s);
             addNewTask();
-            setCurTasks();
             main.msg("Share OK "+s.length());
         } else {
             main.msg("WARNING: nothing to share");
@@ -155,13 +166,13 @@ public class TaskLabAct extends FragmentActivity {
     }
 
     private void downloadRSSLink() {
-        list2action=4;
         new AlertDialog.Builder(this)
             .setTitle("Download RSS page ?")
             .setMessage("Download RSS page ?")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+                    list2action=7;
                     String src="f3";
                     switch(curitems.source) {
                         case 0:
@@ -187,9 +198,6 @@ public class TaskLabAct extends FragmentActivity {
         vals.clear();
         vals.add(curitems.getTitle(i));
         vals.add(curitems.getSummary(i));
-        setCurTasks();
-        setButtons(null,"back",null);
-        but2id=1;
         showList();
     }
 
@@ -219,7 +227,7 @@ public class TaskLabAct extends FragmentActivity {
                             s=s.replace('\n',' ');
                             vals.set(taskid,s);
                             if (taskid>=vals.size()-1) vals.add("<New Task>");
-                            setCurTasks();
+                            if (list2action==5) setCurTasks();
                             showList();
                         }
                     })
@@ -237,22 +245,18 @@ public class TaskLabAct extends FragmentActivity {
     }
 
     private void menuMeteo() {
-        setButtons("Menu","SETUP","FR3");
-        but2id=0;
-        list2action = 6;
         new AlertDialog.Builder(this)
             .setTitle("Download Meteo")
             .setMessage("Download Meteo ?")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+                    list2action = 6;
                     httpget("http://xolki.duckdns.org/meteo?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
     private void menuCalPerso() {
-        setButtons("Menu","SETUP","FR3");
-        but2id=0;
         list2action = 5;
         new AlertDialog.Builder(this)
             .setTitle("Download CalPerso cal ")
@@ -262,45 +266,44 @@ public class TaskLabAct extends FragmentActivity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     httpget("http://xolki.duckdns.org/todocal?auth="+gitlabpwd);
                 }})
-        .setNegativeButton(android.R.string.no, null).show();
+        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    getCurTasks();
+                }}).show();
     } 
     private void menuZimbra() {
-        setButtons("Menu","SETUP","FR3");
-        but2id=0;
-        list2action = 3;
         new AlertDialog.Builder(this)
             .setTitle("Download Zimbra cal ")
             .setMessage("Download Zimbra cal ?")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+                    list2action = 4;
                     httpget("http://xolki.duckdns.org/zimbracal?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
  
     private void menuTODOlist() {
-        setButtons("Menu","SETUP","FR3");
-        but2id=0;
-        list2action = 2;
          new AlertDialog.Builder(this)
             .setTitle("Download TODO ")
             .setMessage("Download TODO ?")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+                    list2action = 2;
                     httpget("http://xolki.duckdns.org/todo?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
     private void menuRSS(final String endpoint) {
-        list2action = 1;
         new AlertDialog.Builder(this)
             .setTitle("Download RSS "+endpoint)
             .setMessage("Download RSS "+endpoint+" ?")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+                    list2action = 1;
                     httpget("http://xolki.duckdns.org/"+endpoint+"?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
@@ -333,10 +336,9 @@ public class TaskLabAct extends FragmentActivity {
                 break;
         }
     }
+    // 1er bouton
     public void menu(View v) {
         list2action = 0;
-        setButtons("Menu","SETUP","FR3");
-        but2id=0;
         vals.clear();
         vals.add("RSS France 3");
         vals.add("RSS ZDNet");
@@ -349,7 +351,7 @@ public class TaskLabAct extends FragmentActivity {
         showList();
     }
 
-    private void pushTODOList() {
+    private void push2git() {
         String topush = "TODO list";
         if (list2action==5) topush = "Cal Perso";
         new AlertDialog.Builder(this)
@@ -469,6 +471,25 @@ public class TaskLabAct extends FragmentActivity {
         });
     }
     private void showList() {
+         switch(list2action) {
+            case 2: // TODO list visible
+            case 5: // calendrier perso visible
+                // on edit une tache 
+                setButtons("Menu","push",null);
+                break;
+            case 1: // liste de RSS items: on veut le detail d'un item
+            case 3: // on est dans detail d'un RSS: on veut download le link
+                setButtons(null,"back",null);
+                break;
+            case 0: // menu principal: choix RSS, emails...
+            case 4: // calendrier Zimbra
+            case 6: // meteo
+            case 7: // page web = détails d'un RSS
+            default:
+                setButtons("Menu","SETUP","Save");
+                break;
+        }
+
         // clean up vals
         for (int i=vals.size()-1;i>=0;i--)
             if (vals.get(i).length()==0) vals.remove(i);
@@ -484,22 +505,27 @@ public class TaskLabAct extends FragmentActivity {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         int itemPosition     = position;
                         // String  itemValue    = (String) listView.getItemAtPosition(position);
-                        // si on veut editer en cliquant dessus:
+                        // Qu'est-ce que l'on fait lorsqu'on clic sur un elt de la liste: cela depend de ce qui est affiche:
                         switch(list2action) {
                             case 0: // menu principal: choix RSS, emails...
                                 choixmenu(itemPosition);
                                 break;
-                            case 1: // liste de RSS items: on veut le detail d'un item
+                            case 1: // on est dans liste de RSS items: on veut le detail d'un item
                                 showDetails(itemPosition);
                                 break;
-                            case 2: // on edit une tache dans la TODO list
-                            case 5:
-                                setButtons("Menu","push",null);
-                                but2id=2;
+                            case 2: // TODO list visible
+                            case 5: // calendrier perso visible
+                                // on edit une tache 
                                 editTask(itemPosition);
                                 break;
                             case 3: // on est dans detail d'un RSS: on veut download le link
                                 downloadRSSLink();
+                                break;
+                            case 4: // calendrier Zimbra: on ne fait rien
+                                break;
+                            case 6: // meteo
+                                break;
+                            case 7: // page web = détails d'un RSS
                                 break;
                             default:
                                 break;
@@ -510,29 +536,45 @@ public class TaskLabAct extends FragmentActivity {
         });
     }
 
-    // shortcut buttons accessible on the first page
+    // 3eme bouton
     public void save(View view) {
         // TODO: quickly add an event, when on the first page
         // on the RSS page, this saves the RSS link to an archive file of interesting links
     }
-    private int but2id = 0;
+    // 2eme bouton
     public void reset(View view) {
-        switch(but2id) {
+        /*
+            0 : le main menu est visible
+            1 : une liste de RSS items est visible
+            2 : la TODO list est visible
+            3 : les details d'un RSS item sont visibles
+            4 : le calendrier Zimbra est visible
+            5 : le calendrier perso est visible
+            6 : la meteo est visible
+            7 : une page web (venant d'un RSS) est visible
+        */
+        switch(list2action) {
             case 0:
+            case 3:
+            case 4:
+            case 6:
+            case 7:
+                // propose de rentrer a nouveau le code d'acces
                 askCreds(null);
                 break;
             case 1:
+                // back: revient a la liste des items RSS depuis le detail de l'un d'entre eux
                 pageRSSList();
                 break;
             case 2:
-                pushTODOList();
+            case 5:
+                // push les nouveaux items dans git
+                push2git();
                 break;
         }
     }
    
     private void pageRSSList() {
-        setButtons("Menu","SETUP","FR3");
-        but2id=0;
         list2action = 1;
         vals.clear();
         for (int i=0;i<curitems.getNitems();i++)
@@ -603,7 +645,8 @@ public class TaskLabAct extends FragmentActivity {
                             parseZimbraCal(str);
                             break;
                         case 4:
-                        case 6:
+                        case 6: // on veut afficher meteo
+                        case 7: // on veut afficher une page web (venant d'un flux RSS)
                             parsePage(str);
                             break;
                     }
@@ -750,7 +793,6 @@ public class TaskLabAct extends FragmentActivity {
                 }
             }
         }
-        setCurTasks();
         main.msg("got ZimbraCal OK");
         showList();
     }
@@ -760,7 +802,7 @@ public class TaskLabAct extends FragmentActivity {
         for (int i=0;i<st.length;i++)
             vals.add(st[i]);
         vals.add("<New item>");
-        setCurTasks();
+        if (list2action==5) setCurTasks();
         main.msg("got TODO OK");
         showList();
     }
@@ -769,7 +811,6 @@ public class TaskLabAct extends FragmentActivity {
         vals.clear();
         for (int i=0;i<curitems.getNitems();i++)
             vals.add(curitems.getTitle(i));
-        setCurTasks();
         main.msg("Pull OK");
         showList();
     }
