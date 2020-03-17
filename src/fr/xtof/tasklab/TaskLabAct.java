@@ -32,6 +32,9 @@ import javax.net.ssl.HttpsURLConnection;
 import java.net.HttpURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Calendar;
 
 import cz.msebera.android.httpclient.client.methods.HttpUriRequest;
 import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
@@ -150,8 +153,15 @@ public class TaskLabAct extends FragmentActivity {
         if (o!=null) {
             String s=(String)o;
             fromshare = ""+s;
-            vals.set(vals.size()-1,s);
-            addNewTask();
+            list2action = 5;
+            getCurTasks();
+            int lastitem = vals.size()-1;
+            Date c = Calendar.getInstance().getTime();
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+            String formattedDate = df.format(c);
+            vals.set(lastitem,formattedDate+" "+fromshare);
+            showList();
+            setCurTasks();
             main.msg("Share OK "+s.length());
         } else {
             main.msg("WARNING: nothing to share");
@@ -538,7 +548,19 @@ public class TaskLabAct extends FragmentActivity {
 
     // 3eme bouton
     public void save(View view) {
-        // TODO: quickly add an event, when on the first page
+        // quickly add an event, when on the first page
+        if (list2action!=3 && list2action!=7) {
+            list2action = 5;
+            getCurTasks();
+            int lastitem = vals.size()-1;
+            Date c = Calendar.getInstance().getTime();
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+            String formattedDate = df.format(c);
+            vals.set(lastitem,formattedDate+" ");
+            showList();
+            editTask(lastitem);
+        }
+ 
         // on the RSS page, this saves the RSS link to an archive file of interesting links
     }
     // 2eme bouton
