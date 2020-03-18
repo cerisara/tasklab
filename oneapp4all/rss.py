@@ -1,6 +1,16 @@
 import feedparser
 import urllib.request
 from bs4 import BeautifulSoup
+import os
+
+def getPage(url):
+    os.system("lynx -dump "+url+" > tt.txt")
+    with open("tt.txt","r") as f: lines = f.readlines()
+    ll = ""
+    for s in lines:
+        ss = s.strip()
+        if len(ss)>0: ll+=ss+'\n'
+    return ll
 
 def cleanhtml(html):
     soup = BeautifulSoup(html)

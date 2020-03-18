@@ -195,7 +195,8 @@ public class TaskLabAct extends FragmentActivity {
                             src="hn";
                             break;
                     }
-                    httpget("http://xolki.duckdns.org/rss"+src+"link?auth="+gitlabpwd+"&link="+curitems.getLinks(focusRSSitem));
+                    // httpget("http://xolki.duckdns.org/rss"+src+"link?auth="+gitlabpwd+"&link="+curitems.getLinks(focusRSSitem));
+                    httpget("http://xolki.duckdns.org/page?auth="+gitlabpwd+"&link="+curitems.getLinks(focusRSSitem));
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }

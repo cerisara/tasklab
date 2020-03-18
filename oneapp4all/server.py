@@ -27,6 +27,13 @@ def rss_france3():
     if r!="": return r
     return rss.rssF3()
 
+@api.route('/page', methods=['GET'])
+def get_page():
+    r=getauth()
+    if r!="": return r
+    link = request.values.get('link')
+    return rss.getPage(link)
+
 @api.route('/rssf3link', methods=['GET'])
 def rss_france3link():
     r=getauth()
