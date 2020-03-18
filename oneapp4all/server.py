@@ -34,38 +34,17 @@ def get_page():
     link = request.values.get('link')
     return rss.getPage(link)
 
-@api.route('/rssf3link', methods=['GET'])
-def rss_france3link():
-    r=getauth()
-    if r!="": return r
-    link = request.values.get('link')
-    return rss.france3link(link)
-
 @api.route('/rsszdnet', methods=['GET'])
 def rss_zdnet():
     r=getauth()
     if r!="": return r
     return rss.rssZDnet()
 
-@api.route('/rsszdnetlink', methods=['GET'])
-def rss_zdnetlink():
-    r=getauth()
-    if r!="": return r
-    link = request.values.get('link')
-    return rss.zdnetlink(link)
-
 @api.route('/rsshn', methods=['GET'])
 def rss_hn():
     r=getauth()
     if r!="": return r
     return rss.rssHN()
-
-@api.route('/rsshnlink', methods=['GET'])
-def rss_hnlink():
-    r=getauth()
-    if r!="": return r
-    link = request.values.get('link')
-    return rss.hnlink(link)
 
 @api.route('/todo', methods=['GET'])
 def todo_list():
