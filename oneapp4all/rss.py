@@ -55,3 +55,5 @@ def rssHN():
     feed = getFeed(url)
     return showFeed(feed)
 
+print(rssAll())
+

@@ -3,14 +3,14 @@ from datetime import datetime
 
 def todo():
     # this repo must be prepared beforehand
-    os.system("cd TODO; git pull")
+    os.system("cd TODO; git pull --no-edit")
     with open("TODO/todo.txt","r") as f: todos = f.readlines()
     s = ''.join(todos)
     return s
 
 def todocal():
     # this repo must be prepared beforehand
-    os.system("cd TODO; git pull")
+    os.system("cd TODO; git pull --no-edit")
     now=datetime.today().strftime('%Y%m%d')
     with open("TODO/calperso.txt","r") as f: todos = f.readlines()
     res=[]

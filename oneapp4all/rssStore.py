@@ -1,25 +1,37 @@
 import rss
 
+# ce prog est appelé depuis un CRON
+
 s2sav = []
 def save(i,s):
+    # TODO place la liste des N derniers hash telecharges dans un fichier
     if hash(s)==curhash[i]: return False
     s2sav.append(s)
     return True
 
 flux = rss.rssAll()
 try:
-    with open("lasthash","r") as f: curhash = [int(s) for s in f.readlines()]
+    # curhash est un dble tableau: (NFlux,Nhash)
+    # qui contient les hash des derniers RSS telecharges
+    curhash = []
+    with open("lasthash","r") as f:
+        for l in f:
+            ch = [int(s) for s in l.split(" ")]
+        curhash.append(ch)
 except:
-    curhash = [hash("toto")]*len(flux)
+    curhash = [[]]*len(flux)
 newhash = []
-# le RSS nous donne le plus recent en 1er
+# le RSS nous donne une liste sans garantie d'ordre chrono
 for i in range(len(flux)):
     s2sav = []
     fl = flux[i]
+    # fl est un array (NFlux,)
+    # chaque elt de l'array est une grande string avec, pour chaque news, \n entre titre,resume,link 
+    # et deux \n\n pour separer les news d'un meme flux
     cur=""
-    hashdone = False
     for l in fl.split("\n"):
         if len(l)==0 and len(cur)>0:
+            # ici: on a une seule news, complete, dans cur
             if not hashdone:
                 newhash.append(hash(cur))
                 hashdone = True
