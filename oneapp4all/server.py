@@ -65,6 +65,13 @@ def push_todo_list():
     parms = request.values.get('txt')
     return todolist.pushtodo(parms)
 
+@api.route('/pushidea', methods=['POST'])
+def push_idea():
+    r=getauth()
+    if r!="": return r
+    parms = request.values.get('txt')
+    return todolist.pushidea(parms)
+
 @api.route('/pushtodocal', methods=['POST'])
 def push_todo_cal():
     r=getauth()

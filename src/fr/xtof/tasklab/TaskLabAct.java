@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.widget.TextView;
+import android.widget.EditText;
 import java.util.Arrays;
 import android.os.Bundle;
 import android.os.AsyncTask;
@@ -35,6 +36,8 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
+import android.text.Editable;
+import android.text.Selection;
 
 import cz.msebera.android.httpclient.client.methods.HttpUriRequest;
 import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
@@ -45,6 +48,8 @@ import com.loopj.android.http.HttpGet;
 import java.net.URI;
 
 public class TaskLabAct extends FragmentActivity {
+    public static final String serverurl = "http://tasklab.cerisara.fr";
+
     private static String gitlabpwd = "";
     private static String gitlabusr = "";
     private static String gitlabtok = null;
@@ -77,6 +82,7 @@ public class TaskLabAct extends FragmentActivity {
         5 : le calendrier perso est visible
         6 : la meteo est visible
         7 : une page web (venant d'un RSS) est visible
+        8 : ecriture d'une idee puis git push
     */
     private int list2action = 0;
     // dernier item d'un flux RSS duquel on a vu le detail
@@ -195,8 +201,7 @@ public class TaskLabAct extends FragmentActivity {
                             src="hn";
                             break;
                     }
-                    // httpget("http://xolki.duckdns.org/rss"+src+"link?auth="+gitlabpwd+"&link="+curitems.getLinks(focusRSSitem));
-                    httpget("http://xolki.duckdns.org/page?auth="+gitlabpwd+"&link="+curitems.getLinks(focusRSSitem));
+                    httpget(serverurl+"/page?auth="+gitlabpwd+"&link="+curitems.getLinks(focusRSSitem));
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
@@ -212,7 +217,7 @@ public class TaskLabAct extends FragmentActivity {
         showList();
     }
 
-    private void editTask(final int taskid) {
+    private void editIdea() {
         class LoginDialogFragment extends DialogFragment {
             @Override
             public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -222,7 +227,50 @@ public class TaskLabAct extends FragmentActivity {
                 View custv = inflater.inflate(R.layout.dialog_edit, null);
                 // recopy the old task text to edit
                 TextView txt = (TextView)custv.findViewById(R.id.taskdef);
-                txt.setText(vals.get(taskid));
+                txt.setText("");
+
+                // Inflate and set the layout for the dialog
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setView(custv)
+                    // Add action buttons
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            TextView txt = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.taskdef);
+                            String s = txt.getText().toString();
+                            String parms = "txt="+s;
+                            httppost(serverurl+"/pushidea?auth="+gitlabpwd,parms);
+                            list2action = 0;
+                        }
+                    })
+                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        LoginDialogFragment.this.getDialog().cancel();
+                        list2action = 0;
+                    }
+                });
+                return builder.create();
+            }
+        }
+        LoginDialogFragment dialog = new LoginDialogFragment();
+        dialog.show(getSupportFragmentManager(),"edit idea");
+    }
+
+    private void editTask(final int taskid) {
+        class LoginDialogFragment extends DialogFragment {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                // Get the layout inflater
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                View custv = inflater.inflate(R.layout.dialog_edit, null);
+                // recopy the old task text to edit
+                EditText txt = (EditText)custv.findViewById(R.id.taskdef);
+                String stxt = vals.get(taskid);
+                txt.setText(stxt);
+                // Editable etext = txt.getText();
+                // Selection.setSelection(etxt,txt.length());
+                txt.setSelection(stxt.length());
 
                 // Inflate and set the layout for the dialog
                 // Pass null as the parent view because its going in the dialog layout
@@ -247,7 +295,6 @@ public class TaskLabAct extends FragmentActivity {
                         LoginDialogFragment.this.getDialog().cancel();
                     }
                 });
-
                 return builder.create();
             }
         }
@@ -255,6 +302,16 @@ public class TaskLabAct extends FragmentActivity {
         dialog.show(getSupportFragmentManager(),"edit task");
     }
 
+    private void menuIdea() {
+        list2action=8;
+        /*
+        Date c = Calendar.getInstance().getTime();
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+        String formattedDate = df.format(c);
+        String idea = "IDEA "+formattedDate+"\n";
+        */
+        editIdea();
+    }
     private void menuMeteo() {
         new AlertDialog.Builder(this)
             .setTitle("Download Meteo")
@@ -263,7 +320,7 @@ public class TaskLabAct extends FragmentActivity {
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     list2action = 6;
-                    httpget("http://xolki.duckdns.org/meteo?auth="+gitlabpwd);
+                    httpget(serverurl+"/meteo?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
@@ -275,7 +332,7 @@ public class TaskLabAct extends FragmentActivity {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    httpget("http://xolki.duckdns.org/todocal?auth="+gitlabpwd);
+                    httpget(serverurl+"/todocal?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
@@ -290,7 +347,7 @@ public class TaskLabAct extends FragmentActivity {
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     list2action = 4;
-                    httpget("http://xolki.duckdns.org/zimbracal?auth="+gitlabpwd);
+                    httpget(serverurl+"/zimbracal?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
@@ -303,7 +360,7 @@ public class TaskLabAct extends FragmentActivity {
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     list2action = 2;
-                    httpget("http://xolki.duckdns.org/todo?auth="+gitlabpwd);
+                    httpget(serverurl+"/todo?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
@@ -315,7 +372,7 @@ public class TaskLabAct extends FragmentActivity {
             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     list2action = 1;
-                    httpget("http://xolki.duckdns.org/"+endpoint+"?auth="+gitlabpwd);
+                    httpget(serverurl+"/"+endpoint+"?auth="+gitlabpwd);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
@@ -345,6 +402,9 @@ public class TaskLabAct extends FragmentActivity {
             case 6:
                 menuMeteo();
                 break;
+            case 7:
+                menuIdea();
+                break;
         }
     }
     // 1er bouton
@@ -358,7 +418,7 @@ public class TaskLabAct extends FragmentActivity {
         vals.add("Calendar PRO");
         vals.add("Calendar PERSO");
         vals.add("Meteo");
-        vals.add("Emails");
+        vals.add("Texts");
         showList();
     }
 
@@ -374,9 +434,9 @@ public class TaskLabAct extends FragmentActivity {
                     String parms = "txt=";
                     for (String p: vals) parms+=p+"£";
                     if (list2action==2)
-                        httppost("http://xolki.duckdns.org/pushtodo?auth="+gitlabpwd,parms);
+                        httppost(serverurl+"/pushtodo?auth="+gitlabpwd,parms);
                     else if (list2action==5)
-                        httppost("http://xolki.duckdns.org/pushtodocal?auth="+gitlabpwd,parms);
+                        httppost(serverurl+"/pushtodocal?auth="+gitlabpwd,parms);
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }

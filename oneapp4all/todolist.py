@@ -30,7 +30,7 @@ def pushtodo(p):
         for l in ll:
             if not l.startswith("<New item>") and not l.startswith("<New Task>") and len(l)>0:
                 f.write(l+'\n')
-    os.system("cd TODO; git commit -am 'ok'; git push")
+    os.system("cd TODO; git commit -am 'todo'; git push")
     return "OK"
 
 def pushtodocal(p):
@@ -53,6 +53,14 @@ def pushtodocal(p):
     with open("TODO/calperso.txt","w") as f:
         for l in al:
             f.write(l+'\n')
-    os.system("cd TODO; git commit -am 'ok'; git push")
+    os.system("cd TODO; git commit -am 'todocal'; git push")
     return "OK"
+
+def pushidea(p):
+    print("push idea "+p)
+    with open("TODO/idea.txt","a") as f:
+        f.write(p+'\n\n')
+    os.system("cd TODO; git commit -am 'idea'; git push")
+    return "OK"
+
 
