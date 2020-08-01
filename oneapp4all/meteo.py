@@ -20,6 +20,10 @@ def meteo():
         if l.startswith("echeance (date/heure)"):
             i=l.find(',')
             dates=l[i+1:].split(',')
+        elif l.startswith("temperature:sol,"):
+            tempK=l[16:].split(',')
+            tempC=[float(t)-273.15 for t in tempK]
+            temp=[str(t) for t in tempC]
         elif l.startswith("pluie,"):
             pl=l[6:].split(',')
         elif l.startswith("nebulosite:basse,"):
@@ -30,6 +34,6 @@ def meteo():
         dd = d.astimezone(loczone)
         if dd>now:
             ddd =dd.strftime('%Y%m%d_%H')
-            s+=ddd+" "+pl[i]+" "+neb[i]+"\n"
+            s+=ddd+" "+pl[i]+" "+neb[i]+" "+temp[i]+"\n"
     return s
 
