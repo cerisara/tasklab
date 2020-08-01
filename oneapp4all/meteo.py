@@ -20,9 +20,9 @@ def meteo():
         if l.startswith("echeance (date/heure)"):
             i=l.find(',')
             dates=l[i+1:].split(',')
-        elif l.startswith("temperature:sol,"):
-            tempK=l[16:].split(',')
-            tempC=[float(t)-273.15 for t in tempK]
+        elif l.startswith("temperature:2m,"):
+            tempK=l[15:].split(',')
+            tempC=[int(float(t)-273.15) for t in tempK]
             temp=[str(t) for t in tempC]
         elif l.startswith("pluie,"):
             pl=l[6:].split(',')
