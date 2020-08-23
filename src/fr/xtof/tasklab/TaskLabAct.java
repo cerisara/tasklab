@@ -303,6 +303,38 @@ public class TaskLabAct extends FragmentActivity {
         dialog.show(getSupportFragmentManager(),"edit task");
     }
 
+    private void menuArxiv() {
+        class LoginDialogFragment extends DialogFragment {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                View custv = inflater.inflate(R.layout.dialog_edit, null);
+                EditText txt = (EditText)custv.findViewById(R.id.taskdef);
+                builder.setView(custv)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            TextView txt = (TextView) LoginDialogFragment.this.getDialog().findViewById(R.id.taskdef);
+                            String s = txt.getText().toString();
+                            s=s.replace('\n',' ');
+			    list2action = 1;
+			    httpget(serverurl+"/arxiv?auth="+gitlabpwd+"&term="+s);
+                            showList();
+                        }
+                    })
+                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        LoginDialogFragment.this.getDialog().cancel();
+                    }
+                });
+                return builder.create();
+            }
+        }
+        LoginDialogFragment dialog = new LoginDialogFragment();
+        dialog.show(getSupportFragmentManager(),"edit term");
+    }
+
     private void menuIdea() {
         list2action=8;
         /*
@@ -362,18 +394,6 @@ public class TaskLabAct extends FragmentActivity {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     list2action = 2;
                     httpget(serverurl+"/todo?auth="+gitlabpwd);
-                }})
-        .setNegativeButton(android.R.string.no, null).show();
-    }
-    private void menuArxiv() {
-        new AlertDialog.Builder(this)
-            .setTitle("Download Arxiv ")
-            .setMessage("Download Arxiv ?")
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    list2action = 1;
-                    httpget(serverurl+"/arxiv?auth="+gitlabpwd+"&term=");
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
