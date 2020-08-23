@@ -1,5 +1,4 @@
 import feedparser
-import urllib.request
 import os
 
 def getPage(url):
@@ -43,6 +42,7 @@ def rssAll():
 def rssF3():
     url = "https://france3-regions.francetvinfo.fr/grand-est/actu/rss"
     feed = getFeed(url)
+    print(feed)
     return showFeed(feed)
 
 def rssZDnet():
@@ -55,5 +55,13 @@ def rssHN():
     feed = getFeed(url)
     return showFeed(feed)
 
-print(rssAll())
+def rssArxiv(term):
+    url="http://export.arxiv.org/api/query?search_query=all:"+term
+    feed = getFeed(url)
+    return showFeed(feed)
+
+# print(rssAll())
+print(rssArxiv("GAN"))
+# print(rssF3())
+
 
