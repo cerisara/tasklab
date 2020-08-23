@@ -27,6 +27,13 @@ def rss_france3():
     if r!="": return r
     return rss.rssF3()
 
+@api.route('/arxiv', methods=['GET'])
+def rss_arxiv():
+    r=getauth()
+    if r!="": return r
+    term = request.values.get('term')
+    return rss.rssArxiv(term)
+
 @api.route('/page', methods=['GET'])
 def get_page():
     r=getauth()

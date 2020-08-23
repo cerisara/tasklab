@@ -61,7 +61,7 @@ def rssArxiv(term):
     return showFeed(feed)
 
 # print(rssAll())
-print(rssArxiv("GAN"))
+# print(rssArxiv("GAN"))
 # print(rssF3())
 
 

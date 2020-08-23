@@ -70,6 +70,7 @@ public class TaskLabAct extends FragmentActivity {
     private RSS fr3items = new RSS(0);
     private RSS zdnetitems = new RSS(1);
     private RSS hnitems = new RSS(2);
+    private RSS arxivitems = new RSS(3);
     private RSS curitems = fr3items;
 
     // action to perform when clicking on an item in the list
@@ -364,6 +365,18 @@ public class TaskLabAct extends FragmentActivity {
                 }})
         .setNegativeButton(android.R.string.no, null).show();
     }
+    private void menuArxiv() {
+        new AlertDialog.Builder(this)
+            .setTitle("Download Arxiv ")
+            .setMessage("Download Arxiv ?")
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    list2action = 1;
+                    httpget(serverurl+"/arxiv?auth="+gitlabpwd+"&term=");
+                }})
+        .setNegativeButton(android.R.string.no, null).show();
+    }
     private void menuRSS(final String endpoint) {
         new AlertDialog.Builder(this)
             .setTitle("Download RSS "+endpoint)
@@ -405,6 +418,9 @@ public class TaskLabAct extends FragmentActivity {
             case 7:
                 menuIdea();
                 break;
+            case 8:
+                menuArxiv();
+                break;
         }
     }
     // 1er bouton
@@ -419,6 +435,7 @@ public class TaskLabAct extends FragmentActivity {
         vals.add("Calendar PERSO");
         vals.add("Meteo");
         vals.add("Texts");
+        vals.add("Arxiv");
         showList();
     }
 
