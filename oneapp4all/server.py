@@ -92,6 +92,13 @@ def zimbra_cal():
     if r!="": return r
     return zimbra.getZimbraCal()
 
+@api.route('/zimbramail', methods=['GET'])
+def zimbra_mail():
+    r=getauth()
+    if r!="": return r
+    return zimbra.getZimbraMailAsRSS()
+
+
 if __name__ == '__main__':
     # this is the port of xolki.duckdns.org on talc2
     api.run(host="0.0.0.0", port=7937)
