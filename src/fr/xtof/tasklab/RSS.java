@@ -10,6 +10,8 @@ public class RSS {
     // 0: France 3
     // 1: ZDNet
     // 2: HackerNews
+    // 3: ArXiv
+    // 4: Zimbra mails
 
     public RSS(int src) {
         source=src;

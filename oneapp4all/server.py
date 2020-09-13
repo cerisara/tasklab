@@ -32,6 +32,7 @@ def rss_arxiv():
     r=getauth()
     if r!="": return r
     term = request.values.get('term')
+    print("debug",term)
     return rss.rssArxiv(term)
 
 @api.route('/page', methods=['GET'])

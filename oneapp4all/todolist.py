@@ -34,6 +34,7 @@ def pushtodo(p):
     return "OK"
 
 def pushtodocal(p):
+    todocal()
     ll = p.split("£")
     newcal=[]
     for l in ll:

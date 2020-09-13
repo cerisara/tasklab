@@ -71,6 +71,7 @@ public class TaskLabAct extends FragmentActivity {
     private RSS zdnetitems = new RSS(1);
     private RSS hnitems = new RSS(2);
     private RSS arxivitems = new RSS(3);
+    private RSS mails = new RSS(4);
     private RSS curitems = fr3items;
 
     // action to perform when clicking on an item in the list
@@ -441,6 +442,10 @@ public class TaskLabAct extends FragmentActivity {
             case 8:
                 menuArxiv();
                 break;
+            case 9:
+                curitems = mails;
+                menuRSS("zimbramail");
+                break;
         }
     }
     // 1er bouton
@@ -456,6 +461,7 @@ public class TaskLabAct extends FragmentActivity {
         vals.add("Meteo");
         vals.add("Texts");
         vals.add("Arxiv");
+        vals.add("Mails");
         showList();
     }
 

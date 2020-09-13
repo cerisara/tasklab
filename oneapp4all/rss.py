@@ -56,7 +56,11 @@ def rssHN():
     return showFeed(feed)
 
 def rssArxiv(term):
-    url="http://export.arxiv.org/api/query?search_query=all:"+term
+    words = term.split(" ")
+    if len(words)>=1: s="all:"+words[0]
+    if len(words)>1:
+      for i in range(1,len(words)): s+="+AND+all:"+words[i]
+    url="http://export.arxiv.org/api/query?search_query="+s
     feed = getFeed(url)
     return showFeed(feed)
 

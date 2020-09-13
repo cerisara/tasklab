@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from rss import showFeed
+import feedparser
 
 def zimbracal(js):
     now=datetime.today().strftime('%Y%m%d')
@@ -34,6 +35,6 @@ def getZimbraMailAsRSS():
     feed = feedparser.parse(s)
     res = []
     for it in feed['items']:
-        res.append((it["title"],it["summary"],it["link"]))
+        res.append((it["title"],it["author"],it["summary"]))
     return showFeed(res)
 
