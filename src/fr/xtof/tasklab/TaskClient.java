@@ -10,6 +10,11 @@ import java.util.ArrayList;
 
 public class TaskClient {
 
+    public interface ListShower {
+        public void showList();
+        public void msg(String s);
+    }
+
     public static final String serverurl = "http://tasklab.cerisara.fr";
 
     private static String serverpwd = "";
@@ -19,36 +24,42 @@ public class TaskClient {
     public static final int MENU = 1;
     public static final int SAVE = 2;
 
-    ArrayList<String> vals = new ArrayList<String>();
+    public ArrayList<String> vals = new ArrayList<String>();
+    private ListShower display = new TextListShower();
 
-    public TaskClient(String pwd) {
+    public TaskClient(String pwd, ListShower lshow) {
         serverpwd = pwd;
         vals.clear();
         vals.add("Press MENU");
-        showList();
+        if (lshow!=null) display = lshow;
+        display.showList();
     }
 
-    private void showList() {
-        for (int i=0;i<vals.size();i++) {
-            System.out.println(Integer.toString(i)+": "+vals.get(i)+"\n");
+    class TextListShower implements ListShower {
+        @Override
+        public void showList() {
+            for (int i=0;i<vals.size();i++) {
+                System.out.println(Integer.toString(i)+": "+vals.get(i)+"\n");
+            }
+            System.out.println("a:MENU b:SETUP c:SAVE");
         }
-        System.out.println("a:MENU b:SETUP c:SAVE");
+        public void msg(String s) {
+            System.out.println(s);
+        }
     }
  
-    private void msg(final String s) {
-        System.out.println(s);
-    }
-
     public void menu() {
         sendToServer(MENU,"");
+        display.showList();
     }
 
     public void setup() {
         // TODO
     }
 
-    public void save() {
-        sendToServer(SAVE,"");
+    public void save(String s) {
+        sendToServer(SAVE,s);
+        display.msg("SAVE OK");
     }
 
     public void select(String pos) {
@@ -100,7 +111,7 @@ public class TaskClient {
             } else l += s+"\n";
         }
         if (s.length()>0) vals.add(s);
-        showList();
+        display.showList();
     }
 
     private void sendToServer(int cmd, String s) {
@@ -121,7 +132,7 @@ public class TaskClient {
     public static void main(String args[]) throws Exception {
         BufferedReader f = new BufferedReader(new FileReader("password.txt"));
         String s=f.readLine();
-        TaskClient cl = new TaskClient(s.trim());
+        TaskClient cl = new TaskClient(s.trim(),null);
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         for (;;) {
@@ -129,7 +140,6 @@ public class TaskClient {
             if (s.equals("Q")) break;
             if (s.equals("a")) cl.menu();
             else if (s.equals("b")) cl.setup();
-            else if (s.equals("c")) cl.save();
             else {
                 cl.select(s);
             }
