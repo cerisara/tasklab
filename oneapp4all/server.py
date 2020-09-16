@@ -1,11 +1,10 @@
 from flask import Flask, json, request
 import auth
-import rss
 import meteo
-import todolist
-import zimbra
 
 api = Flask(__name__)
+
+state = 0
 
 def getauth():
     code = request.args.get('auth')
@@ -15,90 +14,41 @@ def getauth():
     else:
         return ""
 
-@api.route('/meteo', methods=['GET'])
-def rss_meteo():
+@api.route('/menu', methods=['POST'])
+def menu():
     r=getauth()
     if r!="": return r
+    return getmenu()
+
+@api.route('/select', methods=['POST'])
+def select():
+    r=getauth()
+    if r!="": return r
+    txt = request.values.get('txt')
+    return select(txt)
+
+def select(txt):
+    try:
+        pos = int(txt)
+        if state==0:
+            if pos==0: return getmeteo()
+            if pos==1: return getmails()
+            return "ERRORI"
+    except:
+        return "ERROR"
+
+def getmenu():
+    global state
+    state = 0
+    s="METEO\n_n\n" + "MAILS\n"
+    return s
+
+def getmeteo():
+    global state
+    state = 1
     return meteo.meteo()
-
-@api.route('/rssf3', methods=['GET'])
-def rss_france3():
-    r=getauth()
-    if r!="": return r
-    return rss.rssF3()
-
-@api.route('/arxiv', methods=['GET'])
-def rss_arxiv():
-    r=getauth()
-    if r!="": return r
-    term = request.values.get('term')
-    print("debug",term)
-    return rss.rssArxiv(term)
-
-@api.route('/page', methods=['GET'])
-def get_page():
-    r=getauth()
-    if r!="": return r
-    link = request.values.get('link')
-    return rss.getPage(link)
-
-@api.route('/rsszdnet', methods=['GET'])
-def rss_zdnet():
-    r=getauth()
-    if r!="": return r
-    return rss.rssZDnet()
-
-@api.route('/rsshn', methods=['GET'])
-def rss_hn():
-    r=getauth()
-    if r!="": return r
-    return rss.rssHN()
-
-@api.route('/todo', methods=['GET'])
-def todo_list():
-    r=getauth()
-    if r!="": return r
-    return todolist.todo()
-
-@api.route('/todocal', methods=['GET'])
-def todo_cal():
-    r=getauth()
-    if r!="": return r
-    return todolist.todocal()
-
-@api.route('/pushtodo', methods=['POST'])
-def push_todo_list():
-    r=getauth()
-    if r!="": return r
-    parms = request.values.get('txt')
-    return todolist.pushtodo(parms)
-
-@api.route('/pushidea', methods=['POST'])
-def push_idea():
-    r=getauth()
-    if r!="": return r
-    parms = request.values.get('txt')
-    return todolist.pushidea(parms)
-
-@api.route('/pushtodocal', methods=['POST'])
-def push_todo_cal():
-    r=getauth()
-    if r!="": return r
-    parms = request.values.get('txt')
-    return todolist.pushtodocal(parms)
-
-@api.route('/zimbracal', methods=['GET'])
-def zimbra_cal():
-    r=getauth()
-    if r!="": return r
-    return zimbra.getZimbraCal()
-
-@api.route('/zimbramail', methods=['GET'])
-def zimbra_mail():
-    r=getauth()
-    if r!="": return r
-    return zimbra.getZimbraMailAsRSS()
-
+    
+# ====================
 
 if __name__ == '__main__':
     # this is the port of xolki.duckdns.org on talc2

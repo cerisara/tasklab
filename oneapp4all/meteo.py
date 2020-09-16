@@ -34,6 +34,6 @@ def meteo():
         dd = d.astimezone(loczone)
         if dd>now:
             ddd =dd.strftime('%Y%m%d_%H')
-            s+=ddd+" "+pl[i]+" "+neb[i]+" "+temp[i]+"\n"
+            s+=ddd+" "+pl[i]+" "+neb[i]+" "+temp[i]+"\n_n\n"
     return s
 

@@ -7,11 +7,12 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskClient {
 
     public interface ListShower {
-        public void showList();
+        public void showList(List<String> vals);
         public void msg(String s);
     }
 
@@ -32,14 +33,14 @@ public class TaskClient {
         vals.clear();
         vals.add("Press MENU");
         if (lshow!=null) display = lshow;
-        display.showList();
+        display.showList(vals);
     }
 
     class TextListShower implements ListShower {
         @Override
-        public void showList() {
+        public void showList(List<String> vals) {
             for (int i=0;i<vals.size();i++) {
-                System.out.println(Integer.toString(i)+": "+vals.get(i)+"\n");
+                System.out.println(Integer.toString(i)+": "+vals.get(i));
             }
             System.out.println("a:MENU b:SETUP c:SAVE");
         }
@@ -50,7 +51,6 @@ public class TaskClient {
  
     public void menu() {
         sendToServer(MENU,"");
-        display.showList();
     }
 
     public void setup() {
@@ -106,16 +106,16 @@ public class TaskClient {
         for (int i=0;i<lines.length;i++) {
             String l = lines[i].trim();
             if (l.equals("_n") && s.length()>0) {
-                vals.add(s);
+                vals.add(s.trim());
                 s="";
-            } else l += s+"\n";
+            } else s += l+"\n";
         }
-        if (s.length()>0) vals.add(s);
-        display.showList();
+        if (s.length()>0) vals.add(s.trim());
+        display.showList(vals);
     }
 
     private void sendToServer(int cmd, String s) {
-        String parms = null;
+        String parms = "";
         String scmd = "select";
         switch (cmd) {
             case SAVE:

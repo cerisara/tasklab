@@ -25,4 +25,14 @@ The target services include:
 - Quick-save interesting URLs
 - ...
 
+# Primitives
+
+So the communication between the client and the server is limited to the
+following primitives (client point of view):
+
+- select(item) when the user selects an item in the view
+- menu() when the user presses the menu button
+- save(text) for quick-saving some URL
+
+In all cases, the server returns a list of items to show, separated with _n
 
