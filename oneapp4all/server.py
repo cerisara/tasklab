@@ -1,10 +1,11 @@
 from flask import Flask, json, request
 import auth
 import meteo
+import zimbra
 
 api = Flask(__name__)
 
-state = 0
+state = "init"
 
 def getauth():
     code = request.args.get('auth')
@@ -30,7 +31,7 @@ def select():
 def select(txt):
     try:
         pos = int(txt)
-        if state==0:
+        if state=="menu":
             if pos==0: return getmeteo()
             if pos==1: return getmails()
             return "ERRORI"
@@ -39,14 +40,21 @@ def select(txt):
 
 def getmenu():
     global state
-    state = 0
+    state = "menu"
     s="METEO\n_n\n" + "MAILS\n"
     return s
 
 def getmeteo():
     global state
-    state = 1
-    return meteo.meteo()
+    state = "meteo"
+    s = meteo.meteo()
+    print(s)
+    return s
+ 
+def getmails():
+    global state
+    state = "mails"
+    return zimbra.getZimbraMailAsRSS()
     
 # ====================
 
