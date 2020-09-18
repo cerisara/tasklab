@@ -67,6 +67,7 @@ public class TaskClient {
     }
 
     private void httppost(final String url, final String parms) {
+        System.out.println("debug "+parms);
         try {
             byte[] postData       = parms.getBytes("UTF-8");
             int    postDataLength = postData.length;
@@ -115,13 +116,13 @@ public class TaskClient {
     }
 
     private void sendToServer(int cmd, String s) {
-        String parms = "";
+        String parms = "txt=";
         String scmd = "select";
         switch (cmd) {
             case SAVE:
                 scmd = "save";
             case POSITION:
-                parms = s;
+                parms += s;
                 break;
             case MENU:
                 scmd = "menu";
