@@ -3,10 +3,13 @@ import auth
 import meteo
 import zimbra
 import rss
+from os import listdir
+import os.path
 
 api = Flask(__name__)
 
 state = "init"
+fichs = []
 
 def getauth():
     code = request.args.get('auth')
@@ -38,15 +41,48 @@ def select(txt):
             if pos=="2": return getrss("f3")
             if pos=="3": return getrss("zd")
             if pos=="4": return getrss("hn")
+            if pos=="5": return getdir("/home/cerisara/progs")
             return "ERRORI"
+        if state.startswith("dir "): return selfile(pos)
+        if state.startswith("fic "): return editfile(pos)
     except:
         return "ERROR"
+
+def editfile(pos):
+    global state
+    if pos=="1": 
+        curdir = state[4:]
+        parentdir,_ = os.path.split(curdir)
+        return getdir(parentdir)
+    return "ERROREF"
+
+def selfile(pos):
+    global state
+    i = int(pos)
+    curdir = state[4:]
+    if i==len(fichs):
+        parentdir,_ = os.path.split(curdir)
+        if len(parentdir)<=len("/home/cerisara/"): return getdir(curdir)
+        return getdir(parentdir)
+    if i>len(fichs) or i<0: return "ERRORDIR"
+    curfile = curdir+"/"+fichs[i]
+    if os.path.isdir(curfile): return getdir(curfile)
+    state = "fic "+curfile
+    with open(curfile) as f: lines = f.read()
+    return lines+"\n_\n(back)\n"
 
 def getmenu():
     global state
     state = "menu"
-    s="METEO\n_n\n" + "MAILS\n_n\n" + "FRANCE 3\n_n\n" + "ZDnet\n_n\n" + "HackNews\n"
+    s="METEO\n_n\n" + "MAILS\n_n\n" + "FRANCE 3\n_n\n" + "ZDnet\n_n\n" + "HackNews\n_n\n" + "SentEval\n"
     return s
+
+def getdir(s):
+    global state, fichs
+    state = "dir "+s
+    fichs = listdir(s)
+    r = '\n_n\n'.join(fichs) + "\n_n\n(back)\n"
+    return r
 
 def getrss(s):
     global state
