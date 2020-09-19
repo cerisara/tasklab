@@ -2,6 +2,7 @@ from flask import Flask, json, request
 import auth
 import meteo
 import zimbra
+import rss
 
 api = Flask(__name__)
 
@@ -30,10 +31,13 @@ def select():
 
 def select(txt):
     try:
-        pos = int(txt)
+        pos = txt.strip()
         if state=="menu":
-            if pos==0: return getmeteo()
-            if pos==1: return getmails()
+            if pos=="0": return getmeteo()
+            if pos=="1": return getmails()
+            if pos=="2": return getrss("f3")
+            if pos=="3": return getrss("zd")
+            if pos=="4": return getrss("hn")
             return "ERRORI"
     except:
         return "ERROR"
@@ -41,14 +45,21 @@ def select(txt):
 def getmenu():
     global state
     state = "menu"
-    s="METEO\n_n\n" + "MAILS\n"
+    s="METEO\n_n\n" + "MAILS\n_n\n" + "FRANCE 3\n_n\n" + "ZDnet\n_n\n" + "HackNews\n"
     return s
 
+def getrss(s):
+    global state
+    state = "rss"
+    if s=="f3": return rss.rssF3()
+    if s=="zd": return rss.rssZDnet()
+    if s=="hn": return rss.rssHN()
+    return "ERRORR"
+ 
 def getmeteo():
     global state
     state = "meteo"
     s = meteo.meteo()
-    print(s)
     return s
  
 def getmails():
