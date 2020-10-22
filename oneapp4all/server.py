@@ -45,6 +45,7 @@ def select(txt):
             return "ERRORI"
         if state.startswith("dir "): return selfile(pos)
         if state.startswith("fic "): return editfile(pos)
+        if state=="mails": return getmail(pos)
     except:
         return "ERROR"
 
@@ -103,6 +104,11 @@ def getmails():
     state = "mails"
     return zimbra.getZimbraMailAsRSS()
     
+def getmail(pos):
+    global state
+    state = "mail"
+    return zimbra.getZimbraMail(pos)
+
 # ====================
 
 if __name__ == '__main__':

@@ -27,6 +27,32 @@ def getZimbraCal():
     with open("tt","r") as f: s=f.read()
     return zimbracal(s)
 
+def getZimbraMail(pos):
+    import email
+    with open("ttt","r") as f: s=f.readlines()
+    mailid=s[pos]
+    with open(".x.pass","r") as f: pp = f.read().strip()
+    cmd="curl --user 'cerisara:"+pp+"' 'https://zimbra.inria.fr/home/cerisara/?id="+mailid+"' > t4"
+    os.system(cmd)
+
+    with open("t4","r") as f: s=f.readlines()
+    a = '\n'.join(s)
+    b = email.message_from_string(a)
+    body = ""
+    if b.is_multipart():
+        for part in b.walk():
+            ctype = part.get_content_type()
+            cdispo = str(part.get('Content-Disposition'))
+
+            # skip any text/plain (txt) attachments
+            if ctype == 'text/plain' and 'attachment' not in cdispo:
+                body = part.get_payload(decode=True)  # decode
+                break
+    # not multipart - i.e. plain text, no attachments, keeping fingers crossed
+    else:
+        body = b.get_payload(decode=True)
+    return body
+
 def getZimbraMailAsRSS():
     with open(".x.pass","r") as f: pp = f.read().strip()
     cmd="curl --user 'cerisara:"+pp+"' 'https://zimbra.inria.fr/home/cerisara/inbox.rss' > tt"
