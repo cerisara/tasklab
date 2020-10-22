@@ -31,6 +31,8 @@ def getZimbraMailAsRSS():
     with open(".x.pass","r") as f: pp = f.read().strip()
     cmd="curl --user 'cerisara:"+pp+"' 'https://zimbra.inria.fr/home/cerisara/inbox.rss' > tt"
     os.system(cmd)
+    cmd="curl --user 'cerisara:"+pp+"' 'https://zimbra.inria.fr/home/cerisara/inbox?fmt=xml' | xmllint --format - | grep ' id=' | grep '<m ' | sed 's,.* id=\",,g' | cut -d'\"' -f1 > ttt"
+    os.system(cmd)
     with open("tt","r") as f: s=f.read()
     feed = feedparser.parse(s)
     res = []
