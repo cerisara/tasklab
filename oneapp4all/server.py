@@ -25,6 +25,16 @@ def menu():
     if r!="": return r
     return getmenu()
 
+@api.route('/save', methods=['POST'])
+def save():
+    r=getauth()
+    if r!="": return r
+    global state
+    if state=="rssdetails":
+        state = "rss"
+        return sendRSStitles()
+    return getmenu()
+
 @api.route('/select', methods=['POST'])
 def select():
     r=getauth()
@@ -32,8 +42,12 @@ def select():
     txt = request.values.get('txt')
     return select(txt)
 
+rsspos=-1
 def select(txt):
+    global rsspos
+    global state
     try:
+        print("select "+state+" "+txt)
         pos = txt.strip()
         if state=="menu":
             if pos=="0": return getmeteo()
@@ -44,6 +58,12 @@ def select(txt):
             if pos=="5": return zimbra.getZimbraCal()
             if pos=="6": return getdir("/home/cerisara/progs")
             return "ERRORI"
+        if state=="rss":
+            state="rssdetails"
+            rsspos = int(pos)
+            return curRSS[rsspos].split("\t")[1]
+        if state=="rssdetails":
+            return rss.getPage(curRSS[rsspos].split("\t")[2])
         if state.startswith("dir "): return selfile(pos)
         if state.startswith("fic "): return editfile(pos)
         if state=="mails": return getmail(pos)
@@ -86,13 +106,22 @@ def getdir(s):
     r = '\n_n\n'.join(fichs) + "\n_n\n(back)\n"
     return r
 
+curRSS=[]
 def getrss(s):
     global state
+    global curRSS
     state = "rss"
-    if s=="f3": return rss.rssF3()
-    if s=="zd": return rss.rssZDnet()
-    if s=="hn": return rss.rssHN()
-    return "ERRORR"
+    res="ERRORRSS"
+    if s=="f3": res= rss.rssF3()
+    if s=="zd": res= rss.rssZDnet()
+    if s=="hn": res= rss.rssHN()
+    curRSS=res.split("\n")
+    return sendRSStitles()
+
+def sendRSStitles():
+    res=[x.split('\t')[0] for x in curRSS]
+    ress = "\n_n\n".join(res)
+    return ress
  
 def getmeteo():
     global state

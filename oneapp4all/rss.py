@@ -20,16 +20,19 @@ def getFeed(url):
 def showFeed(feed):
     res=""
     for t,s,l in feed:
-        t = t.replace('\n','')
-        s = s.replace('\n','')
-        l = l.replace('\n','')
-        t = t.replace('<p>','')
-        s = s.replace('<p>','')
-        l = l.replace('<p>','')
-        t = t.replace('</p>','')
-        s = s.replace('</p>','')
-        l = l.replace('</p>','')
-        res=res+t+"\n"+s+"\n"+l+"\n_n\n"
+        t = t.replace('\t',' ')
+        s = s.replace('\t',' ')
+        l = l.replace('\t',' ')
+        t = t.replace('\n',' ')
+        s = s.replace('\n',' ')
+        l = l.replace('\n',' ')
+        t = t.replace('<p>',' ')
+        s = s.replace('<p>',' ')
+        l = l.replace('<p>',' ')
+        t = t.replace('</p>',' ')
+        s = s.replace('</p>',' ')
+        l = l.replace('</p>',' ')
+        res=res+t+"\t"+s+"\t"+l+"\n"
     return res 
 
 def rssAll():
@@ -42,7 +45,6 @@ def rssAll():
 def rssF3():
     url = "https://france3-regions.francetvinfo.fr/grand-est/actu/rss"
     feed = getFeed(url)
-    print(feed)
     return showFeed(feed)
 
 def rssZDnet():
