@@ -41,7 +41,8 @@ def select(txt):
             if pos=="2": return getrss("f3")
             if pos=="3": return getrss("zd")
             if pos=="4": return getrss("hn")
-            if pos=="5": return getdir("/home/cerisara/progs")
+            if pos=="5": return zimbra.getZimbraCal()
+            if pos=="6": return getdir("/home/cerisara/progs")
             return "ERRORI"
         if state.startswith("dir "): return selfile(pos)
         if state.startswith("fic "): return editfile(pos)
@@ -75,7 +76,7 @@ def selfile(pos):
 def getmenu():
     global state
     state = "menu"
-    s="METEO\n_n\n" + "MAILS\n_n\n" + "FRANCE 3\n_n\n" + "ZDnet\n_n\n" + "HackNews\n_n\n" + "SentEval\n"
+    s="METEO\n_n\n" + "MAILS\n_n\n" + "FRANCE 3\n_n\n" + "ZDnet\n_n\n" + "HackNews\n_n\n" + "ZimbraCal\n_n\n" + "SentEval\n"
     return s
 
 def getdir(s):

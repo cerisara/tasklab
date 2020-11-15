@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import android.text.Editable;
 import android.text.Selection;
+import java.util.List;
 
 public class TaskLabAct extends FragmentActivity {
     public static final String serverurl = "http://tasklab.cerisara.fr";
@@ -50,12 +51,12 @@ public class TaskLabAct extends FragmentActivity {
         }
 
         model = new TaskClient(serverpwd, new TaskClient.ListShower() {
-            public void showList() {
+            public void showList(final List<String> vals) {
                 main.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         listView = (ListView) findViewById(R.id.list);
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(ctxt, android.R.layout.simple_list_item_1, model.vals);
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(ctxt, android.R.layout.simple_list_item_1, vals);
                         listView.setAdapter(adapter);
                         listView.setOnItemClickListener(new OnItemClickListener() {
                             @Override

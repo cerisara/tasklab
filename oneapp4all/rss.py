@@ -29,7 +29,7 @@ def showFeed(feed):
         t = t.replace('</p>','')
         s = s.replace('</p>','')
         l = l.replace('</p>','')
-        res=res+t+"\n"+s+"\n"+l+"\n\n"
+        res=res+t+"\n"+s+"\n"+l+"\n_n\n"
     return res 
 
 def rssAll():
