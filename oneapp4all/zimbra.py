@@ -24,8 +24,7 @@ def putZimbraCal():
     with open(".x.pass","r") as f: pp = f.read().strip()
     cmd="curl --user 'cerisara:"+pp+"' --upload-file /tmp/t.ics 'https://zimbra.inria.fr/home/cerisara/calendar?fmt=ics'"
     os.system(cmd)
-    with open("tt","r") as f: s=f.read()
-    return zimbracal(s)
+    return "done"
 
 def getZimbraCal():
     with open(".x.pass","r") as f: pp = f.read().strip()
