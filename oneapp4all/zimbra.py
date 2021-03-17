@@ -12,7 +12,9 @@ def zimbracal(js):
     for oo in os:
         nom = oo['inv'][0]['comp'][0]['name']
         deb = oo['inv'][0]['comp'][0]['s'][0]['d']
-        fin = oo['inv'][0]['comp'][0]['e'][0]['d']
+        if 'e' in oo['inv'][0]['comp'][0]:
+            fin = oo['inv'][0]['comp'][0]['e'][0]['d']
+        else: fin = deb
         dat = deb[0:8]
         if dat>=now:
             resa.append(deb+" "+fin+" "+nom)
@@ -25,6 +27,12 @@ def putZimbraCal():
     cmd="curl --user 'cerisara:"+pp+"' --upload-file /tmp/t.ics 'https://zimbra.inria.fr/home/cerisara/calendar?fmt=ics'"
     os.system(cmd)
     return "done"
+
+def getZimbraIcs():
+    with open(".x.pass","r") as f: pp = f.read().strip()
+    cmd="curl --user 'cerisara:"+pp+"' 'https://zimbra.inria.fr/home/cerisara/calendar?start=-2m&fmt=ics' > /tmp/tt.ics"
+    os.system(cmd)
+    return "/tmp/tt.ics"
 
 def getZimbraCal():
     with open(".x.pass","r") as f: pp = f.read().strip()
