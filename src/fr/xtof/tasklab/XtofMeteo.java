@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.Random;
 import java.io.DataInputStream;
 import java.util.ArrayList;
+import java.math.BigDecimal;
 
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -41,9 +42,10 @@ public class XtofMeteo extends Activity {
     public File fdir = null;
 
     private Graph graph;
-    private ArrayList<Point> pts = new ArrayList<Point>();
     private ArrayList<String> times = new ArrayList<String>();
     private ArrayList<Float> pluies = new ArrayList<Float>();
+    private ArrayList<Float> temps = new ArrayList<Float>();
+    private int curval2show = 0;
 
     /** Called when the activity is first created. */
     @Override
@@ -69,6 +71,7 @@ public class XtofMeteo extends Activity {
         String x = s.substring(11,13);
         Integer h = Integer.parseInt(x);
         h += 2; // France TZ
+        if (h>=24) h-=24;
         return h.toString();
     }
     private String getStrJson(String str, int i, char sep) {
@@ -122,26 +125,45 @@ public class XtofMeteo extends Activity {
                         // TODO manage conflicts
                         try {
                             times.clear();
+                            temps.clear();
                             pluies.clear();
                             String s;
-                            int a=0;
-                            for (;;) {
-                                int i=str.indexOf("\"time\"",a);
-                                if (i<0||i+8>=str.length()) break;
-                                i+=8; s=getStrJson(str,i,'"');
-                                if (s==null) break;
-                                String hr = getHour(s);
+                            {
+                                int a=0;
+                                for (;;) {
+                                    int i=str.indexOf("\"time\"",a);
+                                    if (i<0||i+8>=str.length()) break;
+                                    i+=8; s=getStrJson(str,i,'"');
+                                    if (s==null) break;
+                                    String hr = getHour(s);
 
-                                int j=str.indexOf("\"precipitation_amount\"",i);
-                                if (j<0||j+23>=str.length()) break;
-                                j+=23; s=getStrJson(str,j,'}');
-                                if (s==null) break;
-                                float pluie = Float.parseFloat(s);
+                                    int j=str.indexOf("\"precipitation_amount\"",i);
+                                    if (j<0||j+23>=str.length()) break;
+                                    j+=23; s=getStrJson(str,j,'}');
+                                    if (s==null) break;
+                                    float pluie = Float.parseFloat(s);
 
-                                System.out.println("partial json "+hr+" "+pluie);
-                                times.add(hr); pluies.add(pluie);
-                                a=j;
+                                    System.out.println("partial json "+hr+" "+pluie);
+                                    times.add(hr); pluies.add(pluie);
+                                    a=j;
+                                }
                             }
+                            {
+                                int a=str.indexOf("\"time\"");
+                                if (a>=0) {
+                                    for (;;) {
+                                        int i=str.indexOf("\"air_temperature\"",a);
+                                        if (i<0||i+18>=str.length()) break;
+                                        i+=18; s=getStrJson(str,i,',');
+                                        if (s==null) break;
+                                        float temp = Float.parseFloat(s);
+                                        System.out.println("partial temp "+temp);
+                                        temps.add(temp);
+                                        a=i;
+                                    }
+                                }
+                            }
+
                             redrawGraph();
                         } catch (Exception e) {
                             main.msg("Error parsing JSON");
@@ -223,18 +245,29 @@ public class XtofMeteo extends Activity {
         dett.execute();
     }
 
+    public static double round(double d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Double.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        double v= (double)bd.floatValue();
+        return v;
+    }
     private void redrawGraph() {
         main.runOnUiThread(new Runnable() {
             public void run() {
+                ArrayList<Float> vals=null;
+                switch(curval2show) {
+                    case 0: vals = pluies; break;
+                    case 1: vals = temps; break;
+                }
                 Point[] points;
                 Label[] xLabels;
-                float pluiemax = 0;
+                double valmax = 0.4, valmin = 0;
                 System.out.println("redraw graph "+times.size());
                 if (times.size()==0) {
                     points = new Point[2];
                     xLabels = new Label[2];
-                    points[0] = new Point(1,0);
-                    points[1] = new Point(2,0);
+                    points[0] = new Point(1,0.2);
+                    points[1] = new Point(2,0.4);
                     xLabels[0] = new Label(1,"?");
                     xLabels[1] = new Label(2,"?");
                 } else {
@@ -243,15 +276,22 @@ public class XtofMeteo extends Activity {
                     points = new Point[npts];
                     xLabels = new Label[npts];
                     for (int i=0;i<npts;i++) {
-                        points[i] = new Point(i+1,pluies.get(i));
-                        if (pluies.get(i)>pluiemax) pluiemax = pluies.get(i);
+                        points[i] = new Point(i+1,vals.get(i));
+                        if (vals.get(i)>valmax) valmax = vals.get(i);
+                        if (vals.get(i)<valmin) valmin = vals.get(i);
                         xLabels[i] = new Label(i+1,times.get(i));
                     }
                 }
                 System.out.println("points "+points);
+                double[] yLabels = new double[] {valmax*0.33, valmax*0.66, valmax};
+                double ymin = valmin-1.;
+                double ymax = valmax+1.;
+                if (ymin>-ymax/3.) ymin=-ymax/3.;
+                if (ymax<-ymin/3.) ymax=-ymin/3.;
                 graph = new Graph.Builder()
-                    .setWorldCoordinates(-2, points.length+1, -2, pluiemax+1.)
+                    .setWorldCoordinates(-2, points.length+1, ymin, ymax)
                     .setXLabels(xLabels)
+                    .setYTicks(yLabels)
                     .addLineGraph(points, Color.RED)
                     .build();
                 GraphView graphView = (GraphView)findViewById(R.id.graph_view);
@@ -275,7 +315,13 @@ public class XtofMeteo extends Activity {
     }
 
     public void changeView(View v) {
-        pts.clear();
-        final Button but = (Button) findViewById(R.id.butSwitch);
+        curval2show++;
+        if (curval2show>=2) curval2show=0;
+        final TextView txt = (TextView)findViewById(R.id.textview);
+        switch(curval2show) {
+            case 0: txt.setText("Pluie"); break;
+            case 1: txt.setText("Temperature"); break;
+        }
+        redrawGraph();
     }
 }
