@@ -14,6 +14,9 @@ import java.io.File;
 import java.util.Random;
 import java.io.DataInputStream;
 import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 import android.os.AsyncTask;
 import android.app.ProgressDialog;
@@ -48,6 +51,13 @@ public class XtofMeteo extends Activity {
         initgraph();
     }
 
+    private String getStrJson(String str, int i) {
+        int j=str.indexOf("\"",i);
+        byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
+        String s = new String(tmp2, "UTF-8");
+        return s;
+    }
+
 	private class DetProgressTask extends AsyncTask<String, Void, Boolean> {
 
 		private ProgressDialog dialog = new ProgressDialog(ctxt);
@@ -75,35 +85,28 @@ public class XtofMeteo extends Activity {
 					String str="OOO";
 					try {
 						str = new String(response, "UTF-8"); // for UTF-8 encoding
-						System.out.println("RESPONSEEEEEE "+str);
+						System.out.println("ON SUCCESS "+str);
 						// encode
 						//
 						// decode
 						// TODO parse the JSON
-						// TODO handle priorities
-						// TODO manage conflicts
-                        /*
-						int i=str.indexOf("content\"");
-						if (i>=0 && task==0) {
-							i+=10;
-							int j=str.indexOf("\"",i);
-							byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
-							str = new String(tmp2, "UTF-8");
-							if (str.length()==0||str.charAt(str.length()-1)!='\n') str+='\n';
-                            if (fromshare!=null) str+=fromshare+'\n';
-							str+="<New Task>";
-							vals=new ArrayList(Arrays.asList(str.split("\n")));
-							setCurTasks();
-							main.msg("Pull OK");
-							showList();
-						} else if (task==1) {
-							main.msg("Push OK");
-						}
-                        */
-					} catch (Exception e) {
-						e.printStackTrace();
+                        // TODO handle priorities
+                        // TODO manage conflicts
+                        try {
+                            String s;
+                            DateTimeFormatter f = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault());
+                            int i=str.indexOf("\"time\"");
+                            i+=8; s=getStrJson(str,i);
+                            ZonedDateTime d = ZonedDateTime.parse(s, f);
+                            System.out.println("dethour zoneid");
+                            System.out.println(d.getHour());
+                        } catch (Exception e) {
+                            main.msg("Error parsing JSON");
+                            e.printStackTrace();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
 					}
-					System.out.println("ON SUCCESS "+str);
 				}
 
 				@Override
