@@ -46,6 +46,7 @@ public class XtofMeteo extends Activity {
     private ArrayList<Float> pluies = new ArrayList<Float>();
     private ArrayList<Float> temps = new ArrayList<Float>();
     private int curval2show = 0;
+    private int offsetT = 0, dT = 10;
 
     /** Called when the activity is first created. */
     @Override
@@ -271,15 +272,16 @@ public class XtofMeteo extends Activity {
                     xLabels[0] = new Label(1,"?");
                     xLabels[1] = new Label(2,"?");
                 } else {
-                    int npts = times.size();
-                    if (npts>10) npts=10;
+                    int npts = times.size()-offsetT;
+                    if (npts>dT) npts=dT;
                     points = new Point[npts];
                     xLabels = new Label[npts];
                     for (int i=0;i<npts;i++) {
-                        points[i] = new Point(i+1,vals.get(i));
-                        if (vals.get(i)>valmax) valmax = vals.get(i);
-                        if (vals.get(i)<valmin) valmin = vals.get(i);
-                        xLabels[i] = new Label(i+1,times.get(i));
+                        float vv = vals.get(i+offsetT);
+                        points[i] = new Point(i+1,vv);
+                        if (vv>valmax) valmax = vv;
+                        if (vv<valmin) valmin = vv;
+                        xLabels[i] = new Label(i+1,times.get(i+offsetT));
                     }
                 }
                 System.out.println("points "+points);
@@ -316,11 +318,22 @@ public class XtofMeteo extends Activity {
 
     public void changeView(View v) {
         curval2show++;
+        offsetT = 0;
         if (curval2show>=2) curval2show=0;
         final TextView txt = (TextView)findViewById(R.id.textview);
         switch(curval2show) {
             case 0: txt.setText("Pluie"); break;
             case 1: txt.setText("Temperature"); break;
+        }
+        redrawGraph();
+    }
+    public void nextView(View v) {
+        offsetT += dT;
+        if (offsetT>=times.size()) offsetT=0;
+        final TextView txt = (TextView)findViewById(R.id.textview);
+        switch(curval2show) {
+            case 0: txt.setText("Pluie +"+offsetT+"H"); break;
+            case 1: txt.setText("Temperature +"+offsetT+"H"); break;
         }
         redrawGraph();
     }
