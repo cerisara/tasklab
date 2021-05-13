@@ -1,3 +1,10 @@
+/**
+ * Licence: CC BY 4.0
+ *
+ * This app makes use of data and API from https://developer.yr.no/
+ *
+ * */
+
 package fr.xtof.tasklab;
 
 import android.os.Bundle;
@@ -15,9 +22,7 @@ import java.util.Random;
 import java.io.DataInputStream;
 import java.util.ArrayList;
 
-import org.joda.time.*;
-import org.joda.time.format.*;
-
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.app.ProgressDialog;
 import cz.msebera.android.httpclient.*;
@@ -37,6 +42,8 @@ public class XtofMeteo extends Activity {
 
     private Graph graph;
     private ArrayList<Point> pts = new ArrayList<Point>();
+    private ArrayList<String> times = new ArrayList<String>();
+    private ArrayList<Float> pluies = new ArrayList<Float>();
 
     /** Called when the activity is first created. */
     @Override
@@ -50,19 +57,32 @@ public class XtofMeteo extends Activity {
 
         setContentView(R.layout.main);
         // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        initgraph();
+        redrawGraph();
     }
 
-    private String getStrJson(String str, int i) {
+    private String getHour(String s) {
+        System.out.println("getHour with string "+s);
+        // nasty hack, because other options are not so nice:
+        // time package not available in old android
+        // joda not easy to integrate without maven
+        if (s.length()<14) return null;
+        String x = s.substring(11,13);
+        Integer h = Integer.parseInt(x);
+        h += 2; // France TZ
+        return h.toString();
+    }
+    private String getStrJson(String str, int i, char sep) {
         try {
-            int j=str.indexOf("\"",i);
-            byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
-            String s = new String(tmp2, "UTF-8");
+            int j=str.indexOf(sep,i);
+            if (j<0) return null;
+            String s = str.substring(i,j);
+            // byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
+            // String s = new String(tmp2, "UTF-8");
             return s;
         } catch (Exception e) {
             System.out.println("UTF-8 ENCODING exception");
             e.printStackTrace();
-            return str;
+            return null;
         }
     }
 
@@ -79,7 +99,7 @@ public class XtofMeteo extends Activity {
 
 		private void connect(final int task, String url) {
 			SyncHttpClient client = new SyncHttpClient();
-            client.setUserAgent("XtofMeteo/0.1");
+            client.setUserAgent("XtofMeteo/0.1 cerisara@gmail.com");
 			AsyncHttpResponseHandler rephdl = new AsyncHttpResponseHandler() {
 				@Override
 				public void onStart() {
@@ -101,13 +121,28 @@ public class XtofMeteo extends Activity {
                         // TODO handle priorities
                         // TODO manage conflicts
                         try {
+                            times.clear();
+                            pluies.clear();
                             String s;
-                            DateTimeFormatter parser    = ISODateTimeFormat.dateTimeParser();
-                            int i=str.indexOf("\"time\"");
-                            i+=8; s=getStrJson(str,i);
-                            DateTime d = parser.parseDateTime(s);
-                            System.out.println("dethour zoneid");
-                            System.out.println(d.getHourOfDay());
+                            int a=0;
+                            for (;;) {
+                                int i=str.indexOf("\"time\"",a);
+                                if (i<0||i+8>=str.length()) break;
+                                i+=8; s=getStrJson(str,i,'"');
+                                if (s==null) break;
+                                String hr = getHour(s);
+
+                                int j=str.indexOf("\"precipitation_amount\"",i);
+                                if (j<0||j+23>=str.length()) break;
+                                j+=23; s=getStrJson(str,j,'}');
+                                if (s==null) break;
+                                float pluie = Float.parseFloat(s);
+
+                                System.out.println("partial json "+hr+" "+pluie);
+                                times.add(hr); pluies.add(pluie);
+                                a=j;
+                            }
+                            redrawGraph();
                         } catch (Exception e) {
                             main.msg("Error parsing JSON");
                             e.printStackTrace();
@@ -180,7 +215,7 @@ public class XtofMeteo extends Activity {
 				main.msg("Error postexec");
 			}
 		}
-	}
+    }
 
 
     private void getMeteo() {
@@ -188,30 +223,43 @@ public class XtofMeteo extends Activity {
         dett.execute();
     }
 
-    private void initgraph() {
-
-        Point[] points =
-        {
-            new Point(1, 178),  new Point(2, 179),  new Point(3, 179),
-            new Point(4, 181),  new Point(5, 180),  new Point(6, 182),
-            new Point(7, 182),  new Point(8, 184),  new Point(9, 183),
-            new Point(10, 185), new Point(11, 185), new Point(12, 186)
-        };
-        Label[] xLabels =
-        {
-            new Label(1, "J"),  new Label(2, "F"),  new Label(3, "M"),
-            new Label(4, "A"),  new Label(5, "M"),  new Label(6, "J"),
-            new Label(7, "J"),  new Label(8, "A"),  new Label(9, "S"),
-            new Label(10, "O"), new Label(11, "N"), new Label(12, "D")
-        };
-
-        graph = new Graph.Builder()
-            .setWorldCoordinates(-2, 15, -2, 20)
-            .setXLabels(xLabels)
-            .build();
-        GraphView graphView = (GraphView)findViewById(R.id.graph_view);
-        graphView.setGraph(graph);
-        setTitle("Meteo Nancy");
+    private void redrawGraph() {
+        main.runOnUiThread(new Runnable() {
+            public void run() {
+                Point[] points;
+                Label[] xLabels;
+                float pluiemax = 0;
+                System.out.println("redraw graph "+times.size());
+                if (times.size()==0) {
+                    points = new Point[2];
+                    xLabels = new Label[2];
+                    points[0] = new Point(1,0);
+                    points[1] = new Point(2,0);
+                    xLabels[0] = new Label(1,"?");
+                    xLabels[1] = new Label(2,"?");
+                } else {
+                    int npts = times.size();
+                    if (npts>10) npts=10;
+                    points = new Point[npts];
+                    xLabels = new Label[npts];
+                    for (int i=0;i<npts;i++) {
+                        points[i] = new Point(i+1,pluies.get(i));
+                        if (pluies.get(i)>pluiemax) pluiemax = pluies.get(i);
+                        xLabels[i] = new Label(i+1,times.get(i));
+                    }
+                }
+                System.out.println("points "+points);
+                graph = new Graph.Builder()
+                    .setWorldCoordinates(-2, points.length+1, -2, pluiemax+1.)
+                    .setXLabels(xLabels)
+                    .addLineGraph(points, Color.RED)
+                    .build();
+                GraphView graphView = (GraphView)findViewById(R.id.graph_view);
+                graphView.setGraph(graph);
+                setTitle("Meteo Nancy");
+                System.out.println("graph redrawn");
+            }
+        });
     }
 
     public static void msg(final String s) {
