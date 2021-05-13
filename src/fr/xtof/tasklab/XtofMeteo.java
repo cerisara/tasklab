@@ -14,9 +14,9 @@ import java.io.File;
 import java.util.Random;
 import java.io.DataInputStream;
 import java.util.ArrayList;
-import java.time.format.DateTimeFormatter;
-import java.time.ZonedDateTime;
-import java.time.ZoneId;
+
+import org.joda.time.*;
+import org.joda.time.format.*;
 
 import android.os.AsyncTask;
 import android.app.ProgressDialog;
@@ -46,16 +46,24 @@ public class XtofMeteo extends Activity {
         main=this;
         fdir = getExternalFilesDir(null);
 
+        // JodaTimeAndroid.init(this);
+
         setContentView(R.layout.main);
         // getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         initgraph();
     }
 
     private String getStrJson(String str, int i) {
-        int j=str.indexOf("\"",i);
-        byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
-        String s = new String(tmp2, "UTF-8");
-        return s;
+        try {
+            int j=str.indexOf("\"",i);
+            byte[] tmp2 = Base64.decode(str.substring(i,j),Base64.DEFAULT);
+            String s = new String(tmp2, "UTF-8");
+            return s;
+        } catch (Exception e) {
+            System.out.println("UTF-8 ENCODING exception");
+            e.printStackTrace();
+            return str;
+        }
     }
 
 	private class DetProgressTask extends AsyncTask<String, Void, Boolean> {
@@ -94,12 +102,12 @@ public class XtofMeteo extends Activity {
                         // TODO manage conflicts
                         try {
                             String s;
-                            DateTimeFormatter f = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault());
+                            DateTimeFormatter parser    = ISODateTimeFormat.dateTimeParser();
                             int i=str.indexOf("\"time\"");
                             i+=8; s=getStrJson(str,i);
-                            ZonedDateTime d = ZonedDateTime.parse(s, f);
+                            DateTime d = parser.parseDateTime(s);
                             System.out.println("dethour zoneid");
-                            System.out.println(d.getHour());
+                            System.out.println(d.getHourOfDay());
                         } catch (Exception e) {
                             main.msg("Error parsing JSON");
                             e.printStackTrace();
