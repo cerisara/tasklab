@@ -1,25 +1,31 @@
 #!/bin/bash
 
-# put your keystore password in this (uncommited) file:
-signerpass=$(cat jarsigner.password)
+export ANDBIN=/usr/lib/android-sdk/build-tools/debian/
+export ANDJAR=`find /usr/lib/android-sdk/platforms -name "*.jar"`
 
-export ANDBIN=/home/xtof/softs/adt-bundle-linux-x86_64-20140702/sdk/build-tools/21.1.2/
-export ANDJAR=/home/xtof/softs/adt-bundle-linux-x86_64-20140702/sdk/platforms/android-19/android.jar
+echo "android platform: "$ANDJAR
 
-export ANDBIN=/opt/android-sdk/build-tools/24.0.0/
-export ANDJAR=/opt/android-sdk/platforms/android-19/android.jar
+# ========================== INIT
 
-export ANDBIN=/usr/lib/android-sdk/build-tools/24.0.0/
-export ANDBIN=/usr/lib/android-sdk/build-tools/27.0.1/
-export ANDJAR=/usr/lib/android-sdk/platforms/android-23/android.jar
+if [ -e maclef.key ]; then
+  echo "clef déjà générée"
+else
+  echo "génération de la clef..."
+  keytool -genkey -noprompt -keyalg RSA -sigalg SHA256withRSA -keysize 2048 -storepass tototo -keypass tototo -keystore maclef.key -alias toto -dname "CN=example.com, OU=ID, O=example, L=Toto, S=tutu, C=FR" -validity 10000
+  # echo "génération icône..."
+  # mkdir res/drawable-mdpi res/drawable-hdpi res/drawable-xhdpi res/drawable-xxhdpi 
+  # convert -size 124x124  plasma:fractal -blur 0x2  -swirl 180  -shave 10x10  res/drawable-mdpi/dlicon.png
+  # cp res/drawable-mdpi/dlicon.png res/drawable-hdpi/dlicon.png
+  # cp res/drawable-mdpi/dlicon.png res/drawable-xhdpi/dlicon.png
+  # cp res/drawable-mdpi/dlicon.png res/drawable-xxhdpi/dlicon.png
+fi
 
-export ANDBIN=/home/xtof/softs/android-sdk-linux/build-tools/23.0.1/
-export ANDJAR=/home/xtof/softs/android-sdk-linux/platforms/android-23/android.jar
+# ========================== BUILD
 
 export ANDBIN=/usr/lib/android-sdk/build-tools/29.0.3/
 export ANDJAR=/usr/lib/android-sdk/platforms/android-23/android.jar
 
-rm -rf out
+rm -rf gen out
 mkdir gen out
 
 $ANDBIN/aapt package -f \
@@ -29,8 +35,7 @@ $ANDBIN/aapt package -f \
     -J gen/ \
     -m
 
-# La version avec jack/jill ne marche pas sur lully, je ne sais pas pourquoi ?
-
+# version avec jack/jill
 #libs=$(ls libs/*.jar)
 #lidx=0
 #imports=""
@@ -48,7 +53,9 @@ LIBS=$(ls libs/*.jar | awk '{a=a":"$1}END{print a}')
 
 mkdir out
 javac -bootclasspath $ANDJAR -source 1.7 -target 1.7 -cp "$ANDJAR""$LIBS" -d out $SRCFILES $GENFILES
+
 JARS=$(ls $PWD/libs/*.jar | awk '{a=a" "$1}END{print a}')
+echo $JARS
 cd out
 $ANDBIN/dx --dex --output classes.dex $JARS .
 cd ..
@@ -61,11 +68,7 @@ find assets -type f -exec $ANDBIN/aapt add -v out/app.apk {} \;
 cd out
 $ANDBIN/aapt add app.apk classes.dex
 
-# run it once in your HOME:
-# keytool -genkey -v -keystore PATH/TO/YOUR_RELEASE_KEY.keystore -alias YOUR_ALIAS_NAME -keyalg RSA -keysize 2048 -validity 10000
-
-echo "$signerpass"
-
-jarsigner -verbose -keystore $HOME/maclef.keystore -storepass $signerpass -keypass $signerpass -sigalg SHA1withRSA -digestalg SHA1 app.apk xtof54
+apksigner sign --ks ../maclef.key --ks-key-alias toto --ks-pass pass:tototo -key-pass pass:tototo app.apk
+# jarsigner -verbose -keystore ../maclef.key -storepass tototo -keypass tototo app.apk toto
 
 

@@ -5,68 +5,45 @@
     android:layout_height="fill_parent"
     >
 <TextView  
+    android:id="@+id/textview"
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-    android:text="TaskLabAct"
-    />
+    android:text="Meteo a Nancy"
+/>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     >
-
     <Button
+        android:id="@+id/butSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="GET"
-        android:onClick="geturl"
-	/>
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        />    
+        android:text="Switch"
+        android:onClick="changeView"
+    />
     <Button
+        android:id="@+id/butNext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SETUP"
-        android:onClick="reset"
-        />
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        />    
-    <ToggleButton
-        android:id="@+id/zimbrabut"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textOff="ZIMBRA"
-        android:textOn="TASKS"
-        android:onClick="zimbra"
-        />
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        />    
+        android:text="Next"
+        android:onClick="nextView"
+    />
     <Button
-        android:id="@+id/putbut"
+        android:id="@+id/butGet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="PUT"
-        android:onClick="putfile"
-        />
+        android:text="Get"
+        android:onClick="get"
+    />
 </LinearLayout>
 
-<ListView
-    android:id="@+id/list"
-    android:layout_height="wrap_content"
-    android:scrollingCache="true"
-    android:smoothScrollbar="true"
-    android:layout_width="match_parent">
-
-</ListView>
+<com.softmoore.android.graphlib.GraphView
+    android:id="@+id/graph_view"
+    android:layout_width="match_parent"
+    android:layout_height="200dip"
+/>
 
 </LinearLayout>
 
